@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="console.layout.pattern"
+              value="%d{dd-MM-yyyy HH:mm:ss.SSS} [%-25thread] %-5level %-35logger{0}: %msg%n"/>
+
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${console.layout.pattern}</pattern>
+        </encoder>
+    </appender>
+
+    <root level="info"/>
+
+    <logger name="com.example.trips" level="${LOGGING_LEVEL_APP}">
+        <appender-ref ref="console"/>
+    </logger>
+
+    <logger name="org.springframework" level="${LOGGING_LEVEL_SPRING}">
+        <appender-ref ref="console"/>
+    </logger>
+</configuration>

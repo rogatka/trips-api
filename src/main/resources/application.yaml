@@ -1,0 +1,23 @@
+web-security:
+  debug-enabled: ${WEB_SECURITY_DEBUG_ENABLED:true}
+spring:
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: trip-database
+      username: trip
+      password: trip
+  rabbitmq:
+    host: ${RABBIT_MQ_HOST:localhost}
+    virtualHost: ${RABBIT_MQ_VIRTUAL_HOST:}
+    username: ${RABBIT_MQ_USERNAME:guest}
+    password: ${RABBIT_MQ_PASSWORD:guest}
+    template:
+      reply-timeout: ${RABBIT_MQ_REPLY_TIMEOUT:3000}
+
+geolocation-api:
+  url: ${GEOLOCATION_API_URL:https://api.ipgeolocation.io}
+  api-key: ${GEOLOCATION_API_KEY:}
+auth:
+  secret: ${AUTH_SECRET:test}
