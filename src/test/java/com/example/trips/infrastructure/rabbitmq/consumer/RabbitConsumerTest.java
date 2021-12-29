@@ -2,10 +2,9 @@ package com.example.trips.infrastructure.rabbitmq.consumer;
 
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.Trip;
-import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.infrastructure.rabbitmq.model.TripMessageDto;
 import com.example.trips.api.service.TripService;
 import com.example.trips.api.service.TripTimeEnricher;
-import com.example.trips.infrastructure.rabbitmq.consumer.RabbitConsumer;
 import feign.FeignException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

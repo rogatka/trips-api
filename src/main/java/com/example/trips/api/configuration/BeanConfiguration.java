@@ -2,13 +2,13 @@ package com.example.trips.api.configuration;
 
 import com.example.trips.TripApplication;
 import com.example.trips.infrastructure.rabbitmq.consumer.RabbitConsumer;
-import com.example.trips.api.feign.GeolocationFeignClient;
+import com.example.trips.infrastructure.feign.GeolocationFeignClient;
 import com.example.trips.TripRepository;
 import com.example.trips.api.service.TripService;
-import com.example.trips.api.service.TripServiceImpl;
+import com.example.trips.infrastructure.rest.service.TripServiceImpl;
 import com.example.trips.api.service.TripTimeEnricher;
-import com.example.trips.api.service.TripTimeEnricherImpl;
-import com.example.trips.api.configuration.properties.GeolocationProperties;
+import com.example.trips.infrastructure.feign.service.TripTimeEnricherImpl;
+import com.example.trips.infrastructure.feign.confiuration.GeolocationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

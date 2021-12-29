@@ -1,6 +1,6 @@
 package com.example.trips.infrastructure.rabbitmq.consumer;
 
-import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.infrastructure.rabbitmq.model.TripMessageDto;
 import com.example.trips.api.service.TripService;
 import com.example.trips.api.service.TripTimeEnricher;
 import com.example.trips.Trip;

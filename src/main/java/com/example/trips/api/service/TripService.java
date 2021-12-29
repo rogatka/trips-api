@@ -1,7 +1,7 @@
 package com.example.trips.api.service;
 
 
-import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.infrastructure.rest.model.dto.TripCreateDto;
 import com.example.trips.Trip;
 
 import java.util.List;
