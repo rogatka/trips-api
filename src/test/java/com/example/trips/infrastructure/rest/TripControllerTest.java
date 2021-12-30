@@ -3,15 +3,13 @@ package com.example.trips.infrastructure.rest;
 import com.example.trips.api.exception.InternalServerErrorException;
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.exception.ValidationException;
-import com.example.trips.infrastructure.rabbitmq.model.EventType;
-import com.example.trips.Trip;
-import com.example.trips.infrastructure.rest.model.dto.TripCreateDto;
-import com.example.trips.infrastructure.rabbitmq.model.TripMessageDto;
+import com.example.trips.api.model.EventType;
+import com.example.trips.api.model.Trip;
+import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.api.service.TripMessageProcessor;
 import com.example.trips.api.service.TripMessageProcessorAggregator;
 import com.example.trips.api.service.TripService;
-import com.example.trips.infrastructure.rest.configuration.AuthenticationProperties;
-import com.example.trips.infrastructure.rabbitmq.service.RabbitFinishTripMessageProcessor;
-import com.example.trips.infrastructure.rabbitmq.service.RabbitStartTripMessageProcessor;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -270,12 +268,12 @@ class TripControllerTest {
         trip.setEndTime(END_TIME);
         when(tripService.findById(id)).thenReturn(trip);
 
-        RabbitStartTripMessageProcessor rabbitStartTripMessageProcessor = mock(RabbitStartTripMessageProcessor.class);
-        RabbitFinishTripMessageProcessor rabbitFinishTripMessageProcessor = mock(RabbitFinishTripMessageProcessor.class);
-        doNothing().when(rabbitStartTripMessageProcessor).process(any(TripMessageDto.class));
-        doNothing().when(rabbitFinishTripMessageProcessor).process(any(TripMessageDto.class));
-        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.START_TRIP)).thenReturn(rabbitStartTripMessageProcessor);
-        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.FINISH_TRIP)).thenReturn(rabbitFinishTripMessageProcessor);
+        TripMessageProcessor startTripMessageProcessor = mock(TripMessageProcessor.class);
+        TripMessageProcessor finishTripMessageProcessor = mock(TripMessageProcessor.class);
+        doNothing().when(startTripMessageProcessor).process(any(TripMessageDto.class));
+        doNothing().when(finishTripMessageProcessor).process(any(TripMessageDto.class));
+        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.START_TRIP)).thenReturn(startTripMessageProcessor);
+        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.FINISH_TRIP)).thenReturn(finishTripMessageProcessor);
 
         mockMvc.perform(patch("/trips/{id}/start", id)
                         .header("Authorization", "Bearer " + authenticationProperties.getSecret()))

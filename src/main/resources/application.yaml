@@ -21,3 +21,11 @@ geolocation-api:
   api-key: ${GEOLOCATION_API_KEY:}
 auth:
   secret: ${AUTH_SECRET:test}
+
+rabbit:
+  trip:
+    exchange: ${TRIP_EXCHANGE:trips}
+    start-queue-name: ${TRIP_START_QUEUE:start-queue}
+    start-queue-binding-key: ${TRIP_START_QUEUE_BINDING_KEY:trips.start}
+    finish-queue-name: ${TRIP_FINISH_QUEUE:finish-queue}
+    finish-queue-binding-key: ${TRIP_FINISH_QUEUE_BINDING_KEY:trips.finish}

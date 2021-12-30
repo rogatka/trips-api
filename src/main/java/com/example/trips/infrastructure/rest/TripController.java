@@ -1,12 +1,11 @@
 package com.example.trips.infrastructure.rest;
 
-import com.example.trips.infrastructure.rabbitmq.model.EventType;
-import com.example.trips.infrastructure.rest.model.dto.TripCreateDto;
-import com.example.trips.infrastructure.rabbitmq.model.TripMessageDto;
-import com.example.trips.infrastructure.rest.model.request.TripCreateRequest;
+import com.example.trips.api.model.Trip;
+import com.example.trips.api.model.EventType;
+import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripMessageDto;
 import com.example.trips.api.service.TripMessageProcessorAggregator;
 import com.example.trips.api.service.TripService;
-import com.example.trips.Trip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -24,7 +23,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/trips")
-public class TripController {
+class TripController {
 
     private final TripService tripService;
 
