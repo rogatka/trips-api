@@ -3,6 +3,7 @@ package com.example.trips.api.service;
 
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripUpdateDto;
 
 import java.util.List;
 
@@ -13,7 +14,7 @@ public interface TripService {
 
     Trip create(TripCreateDto tripCreateDto);
 
-    Trip update(Trip trip);
+    Trip update(String id, TripUpdateDto tripUpdateDto);
 
     void deleteById(String id);
 }

@@ -9,11 +9,18 @@ class RabbitProperties {
     private Trip trip;
 
     static class Trip {
+        private String topic;
         private String exchange;
-        private String startQueueName;
-        private String finishQueueName;
-        private String startQueueBindingKey;
-        private String finishQueueBindingKey;
+        private String enrichmentQueueName;
+        private String enrichmentQueueBindingKey;
+
+        public String getTopic() {
+            return topic;
+        }
+
+        public void setTopic(String topic) {
+            this.topic = topic;
+        }
 
         public String getExchange() {
             return exchange;
@@ -23,36 +30,20 @@ class RabbitProperties {
             this.exchange = exchange;
         }
 
-        public String getStartQueueName() {
-            return startQueueName;
+        public String getEnrichmentQueueName() {
+            return enrichmentQueueName;
         }
 
-        public void setStartQueueName(String startQueueName) {
-            this.startQueueName = startQueueName;
+        public void setEnrichmentQueueName(String enrichmentQueueName) {
+            this.enrichmentQueueName = enrichmentQueueName;
         }
 
-        public String getFinishQueueName() {
-            return finishQueueName;
+        public String getEnrichmentQueueBindingKey() {
+            return enrichmentQueueBindingKey;
         }
 
-        public void setFinishQueueName(String finishQueueName) {
-            this.finishQueueName = finishQueueName;
-        }
-
-        public String getStartQueueBindingKey() {
-            return startQueueBindingKey;
-        }
-
-        public void setStartQueueBindingKey(String startQueueBindingKey) {
-            this.startQueueBindingKey = startQueueBindingKey;
-        }
-
-        public String getFinishQueueBindingKey() {
-            return finishQueueBindingKey;
-        }
-
-        public void setFinishQueueBindingKey(String finishQueueBindingKey) {
-            this.finishQueueBindingKey = finishQueueBindingKey;
+        public void setEnrichmentQueueBindingKey(String enrichmentQueueBindingKey) {
+            this.enrichmentQueueBindingKey = enrichmentQueueBindingKey;
         }
     }
 

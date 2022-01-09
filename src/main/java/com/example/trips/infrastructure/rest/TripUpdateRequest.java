@@ -5,7 +5,7 @@ import com.example.trips.api.model.GeolocationCoordinates;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-class TripCreateRequest {
+class TripUpdateRequest {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private GeolocationCoordinates startDestinationCoordinates;
@@ -56,7 +56,7 @@ class TripCreateRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TripCreateRequest that = (TripCreateRequest) o;
+        TripUpdateRequest that = (TripUpdateRequest) o;
         return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime) && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates) && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates) && Objects.equals(ownerEmail, that.ownerEmail);
     }
 
@@ -67,7 +67,7 @@ class TripCreateRequest {
 
     @Override
     public String toString() {
-        return "TripCreateRequest{" +
+        return "TripUpdateRequest{" +
                 "startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", startDestinationCoordinates=" + startDestinationCoordinates +

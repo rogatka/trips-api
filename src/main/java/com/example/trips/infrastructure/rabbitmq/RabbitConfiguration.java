@@ -29,21 +29,15 @@ public class RabbitConfiguration implements RabbitListenerConfigurer {
     @Bean
     public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
         TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getTrip().getExchange());
-        Queue startQueue = QueueBuilder.durable(rabbitProperties.getTrip().getStartQueueName()).build();
-        Queue finishQueue = QueueBuilder.durable(rabbitProperties.getTrip().getFinishQueueName()).build();
+        Queue enrichmentQueue = QueueBuilder.durable(rabbitProperties.getTrip().getEnrichmentQueueName()).build();
 
         return new Declarables(
-                startQueue,
-                finishQueue,
+                enrichmentQueue,
                 tripsTopicExchange,
                 BindingBuilder
-                        .bind(startQueue)
+                        .bind(enrichmentQueue)
                         .to(tripsTopicExchange)
-                        .with(rabbitProperties.getTrip().getStartQueueBindingKey()),
-                BindingBuilder
-                        .bind(finishQueue)
-                        .to(tripsTopicExchange)
-                        .with(rabbitProperties.getTrip().getFinishQueueBindingKey()));
+                        .with(rabbitProperties.getTrip().getEnrichmentQueueBindingKey()));
     }
 
     @Override

@@ -1,15 +1,19 @@
 package com.example.trips.infrastructure.rest;
 
-import com.example.trips.api.model.Trip;
-import com.example.trips.api.model.TripCreateDto;
-import com.example.trips.api.service.TripService;
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.exception.ValidationException;
+import com.example.trips.api.model.GeolocationCoordinates;
+import com.example.trips.api.model.GeolocationData;
+import com.example.trips.api.model.Trip;
+import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripUpdateDto;
 import com.example.trips.api.repository.TripRepository;
+import com.example.trips.api.service.TripService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 class TripServiceImpl implements TripService {
@@ -33,22 +37,35 @@ class TripServiceImpl implements TripService {
 
     @Override
     public Trip create(TripCreateDto tripCreateDto) {
+        if (tripCreateDto == null) {
+            throw new ValidationException("TripCreateDto cannot be null");
+        }
         Trip trip = new Trip();
-        String startDestination = tripCreateDto.getStartDestination();
-        String finalDestination = tripCreateDto.getFinalDestination();
+        LocalDateTime startTime = tripCreateDto.getStartTime();
+        LocalDateTime endTime = tripCreateDto.getEndTime();
+        GeolocationCoordinates startDestinationCoordinates = tripCreateDto.getStartDestinationCoordinates();
+        GeolocationCoordinates finalDestinationCoordinates = tripCreateDto.getFinalDestinationCoordinates();
         String ownerEmail = tripCreateDto.getOwnerEmail();
-        validateRequiredFields(startDestination, finalDestination, ownerEmail);
-        fillTripInfo(trip, startDestination, finalDestination, ownerEmail);
-        trip = tripRepository.save(trip);
-        return trip;
+        validateRequiredFields(startDestinationCoordinates, finalDestinationCoordinates, ownerEmail, startTime, endTime);
+        fillTripInfo(trip, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail, startTime, endTime);
+        trip.setDateCreated(LocalDateTime.now());
+        return tripRepository.save(trip);
     }
 
     @Override
-    public Trip update(Trip trip) {
-        if (trip == null) {
-            throw new ValidationException("Trip cannot be null");
+    public Trip update(String id, TripUpdateDto tripUpdateDto) {
+        Objects.requireNonNull(id);
+        if (tripUpdateDto == null) {
+            throw new ValidationException("TripUpdateDto cannot be null");
         }
-        findById(trip.getId());
+        Trip trip = findById(id);
+        LocalDateTime startTime = tripUpdateDto.getStartTime();
+        LocalDateTime endTime = tripUpdateDto.getEndTime();
+        GeolocationCoordinates startDestinationCoordinates = tripUpdateDto.getStartDestinationCoordinates();
+        GeolocationCoordinates finalDestinationCoordinates = tripUpdateDto.getFinalDestinationCoordinates();
+        String ownerEmail = tripUpdateDto.getOwnerEmail();
+        validateRequiredFields(startDestinationCoordinates, finalDestinationCoordinates, ownerEmail, startTime, endTime);
+        fillTripInfo(trip, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail, startTime, endTime);
         return tripRepository.save(trip);
     }
 
@@ -58,32 +75,54 @@ class TripServiceImpl implements TripService {
         tripRepository.deleteById(id);
     }
 
-    private void validateRequiredFields(String startDestination, String finalDestination, String ownerEmail) {
-        validateStartDestination(startDestination);
-        validateFinalDestination(finalDestination);
+    private void validateRequiredFields(GeolocationCoordinates startDestinationCoordinates,
+                                        GeolocationCoordinates finalDestinationCoordinates,
+                                        String ownerEmail,
+                                        LocalDateTime startTime,
+                                        LocalDateTime endTime) {
+        validateStartDestination(startDestinationCoordinates);
+        validateFinalDestination(finalDestinationCoordinates);
         validateEmail(ownerEmail);
+        validateStartTime(startTime);
+        validateEndTime(startTime, endTime);
     }
 
-    private void fillTripInfo(Trip trip, String startDestination, String finalDestination, String ownerEmail) {
-        trip.setStartDestination(startDestination);
-        trip.setFinalDestination(finalDestination);
+    private void fillTripInfo(Trip trip,
+                              GeolocationCoordinates startDestination,
+                              GeolocationCoordinates finalDestination,
+                              String ownerEmail,
+                              LocalDateTime startTime,
+                              LocalDateTime endTime) {
+        fillStartDestinationData(trip, startDestination);
+        fillFinalDestinationData(trip, finalDestination);
         trip.setOwnerEmail(ownerEmail);
-        trip.setDateCreated(LocalDateTime.now());
+        trip.setStartTime(startTime);
+        trip.setEndTime(endTime);
     }
 
-    private void validateStartDestination(String startDestination) {
-        if (startDestination == null) {
-            throw new ValidationException("Start destination cannot be null");
-        } else if (startDestination.isEmpty()) {
-            throw new ValidationException("Start destination cannot be empty");
+    private void fillStartDestinationData(Trip trip, GeolocationCoordinates startDestination) {
+        GeolocationData startGeolocationData = new GeolocationData();
+        startGeolocationData.setLatitude(startDestination.getLatitude());
+        startGeolocationData.setLongitude(startDestination.getLongitude());
+        trip.setStartDestination(startGeolocationData);
+    }
+
+    private void fillFinalDestinationData(Trip trip, GeolocationCoordinates finalDestination) {
+        GeolocationData finalGeolocationData = new GeolocationData();
+        finalGeolocationData.setLatitude(finalDestination.getLatitude());
+        finalGeolocationData.setLongitude(finalDestination.getLongitude());
+        trip.setFinalDestination(finalGeolocationData);
+    }
+
+    private void validateStartDestination(GeolocationCoordinates startDestinationCoordinates) {
+        if (startDestinationCoordinates == null) {
+            throw new ValidationException("Start destination coordinates cannot be null");
         }
     }
 
-    private void validateFinalDestination(String finalDestination) {
-        if (finalDestination == null) {
-            throw new ValidationException("Final destination cannot be null");
-        } else if (finalDestination.isEmpty()) {
-            throw new ValidationException("Final destination cannot be empty");
+    private void validateFinalDestination(GeolocationCoordinates finalDestinationCoordinates) {
+        if (finalDestinationCoordinates == null) {
+            throw new ValidationException("Final destination coordinates cannot be null");
         }
     }
 
@@ -93,6 +132,21 @@ class TripServiceImpl implements TripService {
         }
         if (!EmailValidator.isValid(email)) {
             throw new ValidationException("Invalid email");
+        }
+    }
+
+    private void validateStartTime(LocalDateTime startTime) {
+        if (startTime == null) {
+            throw new ValidationException("Start time cannot be null");
+        }
+    }
+
+    private void validateEndTime(LocalDateTime startTime, LocalDateTime endTime) {
+        if (endTime == null) {
+            throw new ValidationException("End time cannot be null");
+        }
+        if (endTime.isBefore(startTime)) {
+            throw new ValidationException("End time should not be before start time");
         }
     }
 }

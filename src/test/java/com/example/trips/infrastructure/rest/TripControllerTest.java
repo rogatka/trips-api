@@ -1,14 +1,13 @@
 package com.example.trips.infrastructure.rest;
 
-import com.example.trips.api.exception.InternalServerErrorException;
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.exception.ValidationException;
-import com.example.trips.api.model.EventType;
+import com.example.trips.api.model.GeolocationCoordinates;
+import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
 import com.example.trips.api.model.TripMessageDto;
 import com.example.trips.api.service.TripMessageProcessor;
-import com.example.trips.api.service.TripMessageProcessorAggregator;
 import com.example.trips.api.service.TripService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +30,9 @@ import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -45,6 +42,12 @@ class TripControllerTest {
     private static final LocalDateTime CREATION_TIME = LocalDateTime.of(2021, 12, 25, 1, 1, 1, 1);
     private static final LocalDateTime START_TIME = LocalDateTime.of(2021, 12, 26, 1, 1, 1, 1);
     private static final LocalDateTime END_TIME = LocalDateTime.of(2021, 12, 27, 1, 1, 1, 1);
+    private static final double LATITUDE = 55.555555;
+    private static final double LONGITUDE = 44.444444;
+    private static final String START_LOCATION_COUNTRY = "Russia";
+    private static final String START_LOCATION_LOCALITY = "Moscow";
+    private static final String FINAL_LOCATION_COUNTRY = "Unites States";
+    private static final String FINAL_LOCATION_LOCALITY = "Las Vegas";
 
     @Autowired
     private MockMvc mockMvc;
@@ -53,7 +56,7 @@ class TripControllerTest {
     private TripService tripService;
 
     @MockBean
-    private TripMessageProcessorAggregator tripMessageProcessorAggregator;
+    private TripMessageProcessor tripMessageProcessor;
 
     @SpyBean
     private AuthenticationProperties authenticationProperties;
@@ -85,8 +88,8 @@ class TripControllerTest {
         String id = "test";
         Trip trip = new Trip();
         trip.setId(id);
-        trip.setStartDestination("Moscow");
-        trip.setFinalDestination("Paris");
+        trip.setStartDestination(buildGeolocationData(LONGITUDE, LATITUDE, START_LOCATION_COUNTRY, START_LOCATION_LOCALITY));
+        trip.setFinalDestination(buildGeolocationData(LONGITUDE, LATITUDE, FINAL_LOCATION_COUNTRY, FINAL_LOCATION_LOCALITY));
         trip.setOwnerEmail("test@mail.com");
         trip.setDateCreated(CREATION_TIME);
         trip.setStartTime(START_TIME);
@@ -97,8 +100,14 @@ class TripControllerTest {
                         .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(trip.getId())))
-                .andExpect(jsonPath("$.startDestination", is(trip.getStartDestination())))
-                .andExpect(jsonPath("$.finalDestination", is(trip.getFinalDestination())))
+                .andExpect(jsonPath("$.startDestination.longitude", is(trip.getStartDestination().getLongitude())))
+                .andExpect(jsonPath("$.startDestination.latitude", is(trip.getStartDestination().getLatitude())))
+                .andExpect(jsonPath("$.startDestination.country", is(trip.getStartDestination().getCountry())))
+                .andExpect(jsonPath("$.startDestination.locality", is(trip.getStartDestination().getLocality())))
+                .andExpect(jsonPath("$.finalDestination.longitude", is(trip.getFinalDestination().getLongitude())))
+                .andExpect(jsonPath("$.finalDestination.latitude", is(trip.getFinalDestination().getLatitude())))
+                .andExpect(jsonPath("$.finalDestination.country", is(trip.getFinalDestination().getCountry())))
+                .andExpect(jsonPath("$.finalDestination.locality", is(trip.getFinalDestination().getLocality())))
                 .andExpect(jsonPath("$.startTime", is(trip.getStartTime().toString())))
                 .andExpect(jsonPath("$.endTime", is(trip.getEndTime().toString())))
                 .andExpect(jsonPath("$.dateCreated", is(trip.getDateCreated().toString())))
@@ -124,6 +133,8 @@ class TripControllerTest {
         for (int i = 1; i <= 5; i++) {
             Trip trip = new Trip();
             trip.setId(String.valueOf(i));
+            trip.setStartDestination(new GeolocationData());
+            trip.setFinalDestination(new GeolocationData());
             trips.add(trip);
         }
         when(tripService.findAllByEmail(email)).thenReturn(trips);
@@ -150,21 +161,26 @@ class TripControllerTest {
 
     @Test
     void shouldReturnCreatedTrip_And_200_OK_OnSuccessfulTripCreation() throws Exception {
-        TripCreateDto tripCreateDto = new TripCreateDto();
-        tripCreateDto.setOwnerEmail("test@mail.com");
-        tripCreateDto.setStartDestination("Moscow");
-        tripCreateDto.setFinalDestination("Paris");
-
         Trip trip = new Trip();
         trip.setId("test");
-        when(tripService.create(tripCreateDto)).thenReturn(trip);
+        trip.setStartDestination(new GeolocationData());
+        trip.setFinalDestination(new GeolocationData());
+        when(tripService.create(any())).thenReturn(trip);
 
         mockMvc.perform(post("/trips")
                         .contentType(MediaType.APPLICATION_JSON_VALUE)
                         .content("{\n" +
-                                "    \"startDestination\": \"Moscow\",\n" +
-                                "    \"finalDestination\": \"Paris\",\n" +
-                                "    \"ownerEmail\": \"test@mail.com\"\n" +
+                                "    \"startDestinationCoordinates\": {\n" +
+                                "        \"latitude\": 55.555555,\n" +
+                                "        \"longitude\": 44.444444\n" +
+                                "    },\n" +
+                                "    \"finalDestinationCoordinates\": {\n" +
+                                "        \"latitude\": 55.555555,\n" +
+                                "        \"longitude\": 44.444444\n" +
+                                "    },\n" +
+                                "    \"ownerEmail\": \"test@mail.com\",\n" +
+                                "    \"startTime\": \"2021-12-26T01:01:01.001\",\n" +
+                                "    \"endTime\": \"2021-12-27T01:01:01.001\"\n" +
                                 "}")
                         .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
                 .andExpect(status().isOk())
@@ -192,108 +208,12 @@ class TripControllerTest {
                 .andExpect(status().isNoContent());
     }
 
-    @Test
-    void shouldReturn_404_NotFound_OnTripStart_IfTripNotFound() throws Exception {
-        String id = "test";
-        String notFoundMessage = String.format("Trip with id=%s not found", id);
-        NotFoundException notFoundException = new NotFoundException(notFoundMessage);
-        doThrow(notFoundException).when(tripService).findById(id);
-
-        mockMvc.perform(patch("/trips/{id}/start", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$", is(notFoundMessage)));
-    }
-
-    @Test
-    void shouldReturn_500_InternalServerError_IfProcessorNotFoundForEventType() throws Exception {
-        String id = "test";
-        Trip trip = new Trip();
-        trip.setId(id);
-        trip.setStartDestination("Moscow");
-        trip.setFinalDestination("Paris");
-        trip.setOwnerEmail("test@mail.com");
-        trip.setDateCreated(CREATION_TIME);
-        trip.setStartTime(START_TIME);
-        trip.setEndTime(END_TIME);
-        when(tripService.findById(id)).thenReturn(trip);
-
-        doThrow(IllegalStateException.class).when(tripMessageProcessorAggregator).getProcessorForEventType(EventType.START_TRIP);
-
-        mockMvc.perform(patch("/trips/{id}/start", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isInternalServerError());
-
-        doThrow(IllegalStateException.class).when(tripMessageProcessorAggregator).getProcessorForEventType(EventType.FINISH_TRIP);
-        mockMvc.perform(patch("/trips/{id}/finish", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    void shouldReturn_500_InternalServerError_IfInternalServerErrorExceptionInProcessor() throws Exception {
-        String id = "test";
-        Trip trip = new Trip();
-        trip.setId(id);
-        trip.setStartDestination("Moscow");
-        trip.setFinalDestination("Paris");
-        trip.setOwnerEmail("test@mail.com");
-        trip.setDateCreated(CREATION_TIME);
-        trip.setStartTime(START_TIME);
-        trip.setEndTime(END_TIME);
-        when(tripService.findById(id)).thenReturn(trip);
-
-        doThrow(InternalServerErrorException.class).when(tripMessageProcessorAggregator).getProcessorForEventType(EventType.START_TRIP);
-
-        mockMvc.perform(patch("/trips/{id}/start", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isInternalServerError());
-
-        doThrow(InternalServerErrorException.class).when(tripMessageProcessorAggregator).getProcessorForEventType(EventType.FINISH_TRIP);
-        mockMvc.perform(patch("/trips/{id}/finish", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isInternalServerError());
-    }
-
-    @Test
-    void shouldReturn_204_NoContent_OnSuccessfulTripStart_OrTripFinish() throws Exception {
-        String id = "test";
-        Trip trip = new Trip();
-        trip.setId(id);
-        trip.setStartDestination("Moscow");
-        trip.setFinalDestination("Paris");
-        trip.setOwnerEmail("test@mail.com");
-        trip.setDateCreated(CREATION_TIME);
-        trip.setStartTime(START_TIME);
-        trip.setEndTime(END_TIME);
-        when(tripService.findById(id)).thenReturn(trip);
-
-        TripMessageProcessor startTripMessageProcessor = mock(TripMessageProcessor.class);
-        TripMessageProcessor finishTripMessageProcessor = mock(TripMessageProcessor.class);
-        doNothing().when(startTripMessageProcessor).process(any(TripMessageDto.class));
-        doNothing().when(finishTripMessageProcessor).process(any(TripMessageDto.class));
-        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.START_TRIP)).thenReturn(startTripMessageProcessor);
-        when(tripMessageProcessorAggregator.getProcessorForEventType(EventType.FINISH_TRIP)).thenReturn(finishTripMessageProcessor);
-
-        mockMvc.perform(patch("/trips/{id}/start", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isNoContent());
-
-        mockMvc.perform(patch("/trips/{id}/finish", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isNoContent());
-    }
-
-    @Test
-    void shouldReturn_404_NotFound_OnTripFinish_IfTripNotFound() throws Exception {
-        String id = "test";
-        String notFoundMessage = String.format("Trip with id=%s not found", id);
-        NotFoundException notFoundException = new NotFoundException(notFoundMessage);
-        doThrow(notFoundException).when(tripService).findById(id);
-
-        mockMvc.perform(patch("/trips/{id}/finish", id)
-                        .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$", is(notFoundMessage)));
+    private GeolocationData buildGeolocationData(double longitude, double latitude, String country, String locality) {
+        GeolocationData geolocationData = new GeolocationData();
+        geolocationData.setLongitude(longitude);
+        geolocationData.setLatitude(latitude);
+        geolocationData.setCountry(country);
+        geolocationData.setLocality(locality);
+        return geolocationData;
     }
 }

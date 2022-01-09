@@ -17,7 +17,7 @@ spring:
       reply-timeout: ${RABBIT_MQ_REPLY_TIMEOUT:3000}
 
 geolocation-api:
-  url: ${GEOLOCATION_API_URL:https://api.ipgeolocation.io}
+  url: ${GEOLOCATION_API_URL:http://api.positionstack.com/v1}
   api-key: ${GEOLOCATION_API_KEY:}
 auth:
   secret: ${AUTH_SECRET:test}
@@ -25,7 +25,5 @@ auth:
 rabbit:
   trip:
     exchange: ${TRIP_EXCHANGE:trips}
-    start-queue-name: ${TRIP_START_QUEUE:start-queue}
-    start-queue-binding-key: ${TRIP_START_QUEUE_BINDING_KEY:trips.start}
-    finish-queue-name: ${TRIP_FINISH_QUEUE:finish-queue}
-    finish-queue-binding-key: ${TRIP_FINISH_QUEUE_BINDING_KEY:trips.finish}
+    enrichment-queue-name: ${TRIP_ENRICHMENT_QUEUE:enrichment-queue}
+    enrichment-queue-binding-key: ${TRIP_ENRICHMENT_QUEUE_BINDING_KEY:trips.enrichment}

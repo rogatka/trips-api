@@ -1,16 +1,25 @@
-package com.example.trips.infrastructure.rest;
-
-import com.example.trips.api.model.GeolocationCoordinates;
+package com.example.trips.api.model;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-class TripCreateRequest {
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+public class TripUpdateDto {
     private GeolocationCoordinates startDestinationCoordinates;
     private GeolocationCoordinates finalDestinationCoordinates;
     private String ownerEmail;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
+
+    public TripUpdateDto() {
+    }
+
+    public TripUpdateDto(GeolocationCoordinates startDestinationCoordinates, GeolocationCoordinates finalDestinationCoordinates, String ownerEmail, LocalDateTime startTime, LocalDateTime endTime) {
+        this.startDestinationCoordinates = startDestinationCoordinates;
+        this.finalDestinationCoordinates = finalDestinationCoordinates;
+        this.ownerEmail = ownerEmail;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
 
     public LocalDateTime getStartTime() {
         return startTime;
@@ -56,7 +65,7 @@ class TripCreateRequest {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TripCreateRequest that = (TripCreateRequest) o;
+        TripUpdateDto that = (TripUpdateDto) o;
         return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime) && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates) && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates) && Objects.equals(ownerEmail, that.ownerEmail);
     }
 
@@ -67,7 +76,7 @@ class TripCreateRequest {
 
     @Override
     public String toString() {
-        return "TripCreateRequest{" +
+        return "TripUpdateDto{" +
                 "startTime=" + startTime +
                 ", endTime=" + endTime +
                 ", startDestinationCoordinates=" + startDestinationCoordinates +

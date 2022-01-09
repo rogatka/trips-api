@@ -1,35 +1,60 @@
 package com.example.trips.api.model;
 
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class TripCreateDto {
-    private String startDestination;
-    private String finalDestination;
+    private GeolocationCoordinates startDestinationCoordinates;
+    private GeolocationCoordinates finalDestinationCoordinates;
     private String ownerEmail;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
 
     public TripCreateDto() {
     }
 
-    public TripCreateDto(String startDestination, String finalDestination, String ownerEmail) {
-        this.startDestination = startDestination;
-        this.finalDestination = finalDestination;
+    public TripCreateDto(GeolocationCoordinates startDestinationCoordinates,
+                         GeolocationCoordinates finalDestinationCoordinates,
+                         String ownerEmail,
+                         LocalDateTime startTime,
+                         LocalDateTime endTime) {
+        this.startDestinationCoordinates = startDestinationCoordinates;
+        this.finalDestinationCoordinates = finalDestinationCoordinates;
         this.ownerEmail = ownerEmail;
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
-    public String getStartDestination() {
-        return startDestination;
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
-    public void setStartDestination(String startDestination) {
-        this.startDestination = startDestination;
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
     }
 
-    public String getFinalDestination() {
-        return finalDestination;
+    public LocalDateTime getEndTime() {
+        return endTime;
     }
 
-    public void setFinalDestination(String finalDestination) {
-        this.finalDestination = finalDestination;
+    public void setEndTime(LocalDateTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public GeolocationCoordinates getStartDestinationCoordinates() {
+        return startDestinationCoordinates;
+    }
+
+    public void setStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
+        this.startDestinationCoordinates = startDestinationCoordinates;
+    }
+
+    public GeolocationCoordinates getFinalDestinationCoordinates() {
+        return finalDestinationCoordinates;
+    }
+
+    public void setFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
+        this.finalDestinationCoordinates = finalDestinationCoordinates;
     }
 
     public String getOwnerEmail() {
@@ -45,19 +70,21 @@ public class TripCreateDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         TripCreateDto that = (TripCreateDto) o;
-        return Objects.equals(startDestination, that.startDestination) && Objects.equals(finalDestination, that.finalDestination) && Objects.equals(ownerEmail, that.ownerEmail);
+        return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime) && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates) && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates) && Objects.equals(ownerEmail, that.ownerEmail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(startDestination, finalDestination, ownerEmail);
+        return Objects.hash(startTime, endTime, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail);
     }
 
     @Override
     public String toString() {
         return "TripCreateDto{" +
-                "startDestination='" + startDestination + '\'' +
-                ", finalDestination='" + finalDestination + '\'' +
+                "startTime=" + startTime +
+                ", endTime=" + endTime +
+                ", startDestinationCoordinates=" + startDestinationCoordinates +
+                ", finalDestinationCoordinates=" + finalDestinationCoordinates +
                 ", ownerEmail='" + ownerEmail + '\'' +
                 '}';
     }
