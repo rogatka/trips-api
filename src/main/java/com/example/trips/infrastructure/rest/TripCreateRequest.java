@@ -1,78 +1,88 @@
 package com.example.trips.infrastructure.rest;
 
 import com.example.trips.api.model.GeolocationCoordinates;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 class TripCreateRequest {
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private GeolocationCoordinates startDestinationCoordinates;
-    private GeolocationCoordinates finalDestinationCoordinates;
-    private String ownerEmail;
 
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
+  private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
+  private LocalDateTime startTime;
+  private LocalDateTime endTime;
+  private GeolocationCoordinates startDestinationCoordinates;
+  private GeolocationCoordinates finalDestinationCoordinates;
+  private String ownerEmail;
 
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
+  public LocalDateTime getStartTime() {
+    return startTime;
+  }
 
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
+  public void setStartTime(LocalDateTime startTime) {
+    this.startTime = startTime;
+  }
 
-    public GeolocationCoordinates getStartDestinationCoordinates() {
-        return startDestinationCoordinates;
-    }
+  public LocalDateTime getEndTime() {
+    return endTime;
+  }
 
-    public void setStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
-        this.startDestinationCoordinates = startDestinationCoordinates;
-    }
+  public void setEndTime(LocalDateTime endTime) {
+    this.endTime = endTime;
+  }
 
-    public GeolocationCoordinates getFinalDestinationCoordinates() {
-        return finalDestinationCoordinates;
-    }
+  public GeolocationCoordinates getStartDestinationCoordinates() {
+    return startDestinationCoordinates;
+  }
 
-    public void setFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
-        this.finalDestinationCoordinates = finalDestinationCoordinates;
-    }
+  public void setStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
+    this.startDestinationCoordinates = startDestinationCoordinates;
+  }
 
-    public String getOwnerEmail() {
-        return ownerEmail;
-    }
+  public GeolocationCoordinates getFinalDestinationCoordinates() {
+    return finalDestinationCoordinates;
+  }
 
-    public void setOwnerEmail(String ownerEmail) {
-        this.ownerEmail = ownerEmail;
-    }
+  public void setFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
+    this.finalDestinationCoordinates = finalDestinationCoordinates;
+  }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        TripCreateRequest that = (TripCreateRequest) o;
-        return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime) && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates) && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates) && Objects.equals(ownerEmail, that.ownerEmail);
-    }
+  public String getOwnerEmail() {
+    return ownerEmail;
+  }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(startTime, endTime, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail);
-    }
+  public void setOwnerEmail(String ownerEmail) {
+    this.ownerEmail = ownerEmail;
+  }
 
-    @Override
-    public String toString() {
-        return "TripCreateRequest{" +
-                "startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", startDestinationCoordinates=" + startDestinationCoordinates +
-                ", finalDestinationCoordinates=" + finalDestinationCoordinates +
-                ", ownerEmail='" + ownerEmail + '\'' +
-                '}';
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
+    TripCreateRequest that = (TripCreateRequest) o;
+    return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime)
+        && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
+        && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates)
+        && Objects.equals(ownerEmail, that.ownerEmail);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(startTime, endTime, startDestinationCoordinates,
+        finalDestinationCoordinates, ownerEmail);
+  }
+
+  @Override
+  public String toString() {
+    return "TripCreateRequest{" +
+        "startTime=" + startTime +
+        ", endTime=" + endTime +
+        ", startDestinationCoordinates=" + startDestinationCoordinates +
+        ", finalDestinationCoordinates=" + finalDestinationCoordinates +
+        ", ownerEmail=" + EMAIL_OBFUSCATED +
+        '}';
+  }
 }

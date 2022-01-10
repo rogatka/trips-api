@@ -15,47 +15,47 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
-public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
+class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
-    private final AuthenticationProperties authenticationProperties;
+  private final AuthenticationProperties authenticationProperties;
 
-    public SecurityConfiguration(AuthenticationProperties authenticationProperties) {
-        this.authenticationProperties = authenticationProperties;
-    }
+  public SecurityConfiguration(AuthenticationProperties authenticationProperties) {
+    this.authenticationProperties = authenticationProperties;
+  }
 
-    @Value("${web-security.debug-enabled}")
-    private boolean isDebugEnabled;
+  @Value("${web-security.debug-enabled}")
+  private boolean isDebugEnabled;
 
-    @Override
-    @Bean
-    public AuthenticationManager authenticationManagerBean() {
-        return authentication -> authentication;
-    }
+  @Override
+  @Bean
+  public AuthenticationManager authenticationManagerBean() {
+    return authentication -> authentication;
+  }
 
-    @Override
-    public void configure(WebSecurity web) {
-        web.debug(isDebugEnabled);
-    }
+  @Override
+  public void configure(WebSecurity web) {
+    web.debug(isDebugEnabled);
+  }
 
-    @Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        super.configure(httpSecurity);
-        httpSecurity
-                .csrf().disable()
-                .cors()
-                .and()
-                .headers()
-                .xssProtection().xssProtectionEnabled(true)
-                .and()
-                .httpStrictTransportSecurity()
-                .and()
-                .and()
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and()
-                .exceptionHandling().authenticationEntryPoint(new RestAuthenticationEntryPoint());
+  @Override
+  protected void configure(HttpSecurity httpSecurity) throws Exception {
+    super.configure(httpSecurity);
+    httpSecurity
+        .csrf().disable()
+        .cors()
+        .and()
+        .headers()
+        .xssProtection().xssProtectionEnabled(true)
+        .and()
+        .httpStrictTransportSecurity()
+        .and()
+        .and()
+        .sessionManagement()
+        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        .and()
+        .exceptionHandling().authenticationEntryPoint(new RestAuthenticationEntryPoint());
 
-        httpSecurity.addFilterBefore(new TokenAuthenticationFilter(authenticationProperties),
-                LogoutFilter.class);
-    }
+    httpSecurity.addFilterBefore(new TokenAuthenticationFilter(authenticationProperties),
+        LogoutFilter.class);
+  }
 }

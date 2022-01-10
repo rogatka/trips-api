@@ -1,16 +1,16 @@
 package com.example.trips.api.repository;
 
 import com.example.trips.api.model.Trip;
-
 import java.util.List;
 import java.util.Optional;
 
 public interface TripRepository {
-    Optional<Trip> findById(String id);
 
-    List<Trip> findAllByEmail(String email);
+  Optional<Trip> findById(String id);
 
-    Trip save(Trip trip);
+  List<Trip> findAllByEmail(String email);
 
-    void deleteById(String id);
+  Trip save(Trip trip);
+
+  void deleteById(String id);
 }

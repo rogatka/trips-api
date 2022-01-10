@@ -4,17 +4,17 @@ package com.example.trips.api.service;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
 import com.example.trips.api.model.TripUpdateDto;
-
 import java.util.List;
 
 public interface TripService {
-    Trip findById(String id);
 
-    List<Trip> findAllByEmail(String email);
+  Trip findById(String id);
 
-    Trip create(TripCreateDto tripCreateDto);
+  List<Trip> findAllByEmail(String email);
 
-    Trip update(String id, TripUpdateDto tripUpdateDto);
+  Trip create(TripCreateDto tripCreateDto);
 
-    void deleteById(String id);
+  Trip update(String id, TripUpdateDto tripUpdateDto);
+
+  void deleteById(String id);
 }

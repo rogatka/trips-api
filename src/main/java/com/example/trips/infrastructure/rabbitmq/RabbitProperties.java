@@ -6,52 +6,54 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "rabbit")
 class RabbitProperties {
-    private Trip trip;
 
-    static class Trip {
-        private String topic;
-        private String exchange;
-        private String enrichmentQueueName;
-        private String enrichmentQueueBindingKey;
+  private Trip trip;
 
-        public String getTopic() {
-            return topic;
-        }
+  static class Trip {
 
-        public void setTopic(String topic) {
-            this.topic = topic;
-        }
+    private String topic;
+    private String exchange;
+    private String enrichmentQueueName;
+    private String enrichmentQueueBindingKey;
 
-        public String getExchange() {
-            return exchange;
-        }
-
-        public void setExchange(String exchange) {
-            this.exchange = exchange;
-        }
-
-        public String getEnrichmentQueueName() {
-            return enrichmentQueueName;
-        }
-
-        public void setEnrichmentQueueName(String enrichmentQueueName) {
-            this.enrichmentQueueName = enrichmentQueueName;
-        }
-
-        public String getEnrichmentQueueBindingKey() {
-            return enrichmentQueueBindingKey;
-        }
-
-        public void setEnrichmentQueueBindingKey(String enrichmentQueueBindingKey) {
-            this.enrichmentQueueBindingKey = enrichmentQueueBindingKey;
-        }
+    public String getTopic() {
+      return topic;
     }
 
-    public Trip getTrip() {
-        return trip;
+    public void setTopic(String topic) {
+      this.topic = topic;
     }
 
-    public void setTrip(Trip trip) {
-        this.trip = trip;
+    public String getExchange() {
+      return exchange;
     }
+
+    public void setExchange(String exchange) {
+      this.exchange = exchange;
+    }
+
+    public String getEnrichmentQueueName() {
+      return enrichmentQueueName;
+    }
+
+    public void setEnrichmentQueueName(String enrichmentQueueName) {
+      this.enrichmentQueueName = enrichmentQueueName;
+    }
+
+    public String getEnrichmentQueueBindingKey() {
+      return enrichmentQueueBindingKey;
+    }
+
+    public void setEnrichmentQueueBindingKey(String enrichmentQueueBindingKey) {
+      this.enrichmentQueueBindingKey = enrichmentQueueBindingKey;
+    }
+  }
+
+  public Trip getTrip() {
+    return trip;
+  }
+
+  public void setTrip(Trip trip) {
+    this.trip = trip;
+  }
 }

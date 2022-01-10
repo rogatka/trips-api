@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 @SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class TripApplication {
 
-    public static void main(final String[] args) {
-        SpringApplication.run(TripApplication.class);
-    }
+  public static void main(final String[] args) {
+    SpringApplication.run(TripApplication.class);
+  }
 }

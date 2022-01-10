@@ -1,11 +1,12 @@
 package com.example.trips.infrastructure.rest;
 
 import com.example.trips.api.model.GeolocationCoordinates;
-
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 class TripUpdateRequest {
+
+    private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private GeolocationCoordinates startDestinationCoordinates;
@@ -72,7 +73,7 @@ class TripUpdateRequest {
                 ", endTime=" + endTime +
                 ", startDestinationCoordinates=" + startDestinationCoordinates +
                 ", finalDestinationCoordinates=" + finalDestinationCoordinates +
-                ", ownerEmail='" + ownerEmail + '\'' +
+                ", ownerEmail=" + EMAIL_OBFUSCATED +
                 '}';
     }
 }

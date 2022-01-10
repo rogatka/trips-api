@@ -19,54 +19,55 @@ import org.springframework.messaging.handler.annotation.support.DefaultMessageHa
 import org.springframework.messaging.handler.annotation.support.MessageHandlerMethodFactory;
 
 @Configuration
-public class RabbitConfiguration implements RabbitListenerConfigurer {
+class RabbitConfiguration implements RabbitListenerConfigurer {
 
-    @Bean
-    public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
-        return new RabbitAdmin(connectionFactory);
-    }
+  @Bean
+  public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
+    return new RabbitAdmin(connectionFactory);
+  }
 
-    @Bean
-    public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
-        TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getTrip().getExchange());
-        Queue enrichmentQueue = QueueBuilder.durable(rabbitProperties.getTrip().getEnrichmentQueueName()).build();
+  @Bean
+  public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
+    TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getTrip().getExchange());
+    Queue enrichmentQueue = QueueBuilder.durable(
+        rabbitProperties.getTrip().getEnrichmentQueueName()).build();
 
-        return new Declarables(
-                enrichmentQueue,
-                tripsTopicExchange,
-                BindingBuilder
-                        .bind(enrichmentQueue)
-                        .to(tripsTopicExchange)
-                        .with(rabbitProperties.getTrip().getEnrichmentQueueBindingKey()));
-    }
+    return new Declarables(
+        enrichmentQueue,
+        tripsTopicExchange,
+        BindingBuilder
+            .bind(enrichmentQueue)
+            .to(tripsTopicExchange)
+            .with(rabbitProperties.getTrip().getEnrichmentQueueBindingKey()));
+  }
 
-    @Override
-    public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
-        registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
-    }
+  @Override
+  public void configureRabbitListeners(RabbitListenerEndpointRegistrar registrar) {
+    registrar.setMessageHandlerMethodFactory(messageHandlerMethodFactory());
+  }
 
-    @Bean
-    public MessageHandlerMethodFactory messageHandlerMethodFactory() {
-        DefaultMessageHandlerMethodFactory messageHandlerMethodFactory
-                = new DefaultMessageHandlerMethodFactory();
-        messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
-        return messageHandlerMethodFactory;
-    }
+  @Bean
+  public MessageHandlerMethodFactory messageHandlerMethodFactory() {
+    DefaultMessageHandlerMethodFactory messageHandlerMethodFactory
+        = new DefaultMessageHandlerMethodFactory();
+    messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
+    return messageHandlerMethodFactory;
+  }
 
-    @Bean
-    public MappingJackson2MessageConverter consumerJackson2MessageConverter() {
-        return new MappingJackson2MessageConverter();
-    }
+  @Bean
+  public MappingJackson2MessageConverter consumerJackson2MessageConverter() {
+    return new MappingJackson2MessageConverter();
+  }
 
-    @Bean
-    public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
-        final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
-        rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
-        return rabbitTemplate;
-    }
+  @Bean
+  public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
+    final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
+    rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
+    return rabbitTemplate;
+  }
 
-    @Bean
-    public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
-        return new Jackson2JsonMessageConverter();
-    }
+  @Bean
+  public Jackson2JsonMessageConverter producerJackson2MessageConverter() {
+    return new Jackson2JsonMessageConverter();
+  }
 }
