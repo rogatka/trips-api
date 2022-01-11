@@ -92,14 +92,25 @@ class TripServiceImpl implements TripService {
   }
 
   private Trip updateTripFromTripUpdateDto(Trip trip, TripUpdateDto tripUpdateDto) {
-    trip.setStartDestination(
-        getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()));
-    trip.setFinalDestination(
-        getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()));
-    trip.setStartTime(tripUpdateDto.getStartTime());
-    trip.setEndTime(tripUpdateDto.getEndTime());
-    trip.setOwnerEmail(tripUpdateDto.getOwnerEmail());
-    return trip;
+    Trip.Builder builder = Trip.builderFromExisting(trip);
+    if (tripUpdateDto.getStartDestinationCoordinates() != null) {
+      builder = builder.withStartDestination(
+          getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()));
+    }
+    if (tripUpdateDto.getFinalDestinationCoordinates() != null) {
+      builder = builder.withFinalDestination(
+          getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()));
+    }
+    if (tripUpdateDto.getStartTime() != null) {
+      builder = builder.withStartTime(tripUpdateDto.getStartTime());
+    }
+    if (tripUpdateDto.getEndTime() != null) {
+      builder = builder.withEndTime(tripUpdateDto.getEndTime());
+    }
+    if (tripUpdateDto.getOwnerEmail() != null) {
+      builder = builder.withOwnerEmail(tripUpdateDto.getOwnerEmail());
+    }
+    return builder.build();
   }
 
   private GeolocationData getStartDestinationData(GeolocationCoordinates startDestination) {

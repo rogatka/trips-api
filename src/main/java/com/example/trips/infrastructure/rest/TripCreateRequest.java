@@ -9,9 +9,13 @@ class TripCreateRequest {
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
   private LocalDateTime startTime;
+
   private LocalDateTime endTime;
+
   private GeolocationCoordinates startDestinationCoordinates;
+
   private GeolocationCoordinates finalDestinationCoordinates;
+
   private String ownerEmail;
 
   public LocalDateTime getStartTime() {

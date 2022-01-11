@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 public class ExceptionHandlingAdvice {
 
   private static final Logger log = LoggerFactory.getLogger(ExceptionHandlingAdvice.class);
+
   private static final String UNKNOWN_ERROR = "Unknown error";
 
   @ExceptionHandler(Exception.class)

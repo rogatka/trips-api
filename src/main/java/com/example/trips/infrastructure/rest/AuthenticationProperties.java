@@ -1,19 +1,19 @@
 package com.example.trips.infrastructure.rest;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Configuration
 @ConfigurationProperties(prefix = "auth")
+@ConstructorBinding
 class AuthenticationProperties {
 
-  private String secret;
+  private final String secret;
+
+  public AuthenticationProperties(String secret) {
+    this.secret = secret;
+  }
 
   public String getSecret() {
     return secret;
-  }
-
-  public void setSecret(String secret) {
-    this.secret = secret;
   }
 }

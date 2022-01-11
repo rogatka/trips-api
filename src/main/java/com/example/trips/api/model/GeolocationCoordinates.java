@@ -5,6 +5,7 @@ import java.util.Objects;
 public class GeolocationCoordinates {
 
   private final double latitude;
+
   private final double longitude;
 
   public GeolocationCoordinates(double latitude, double longitude) {
@@ -22,12 +23,12 @@ public class GeolocationCoordinates {
 
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     GeolocationCoordinates that = (GeolocationCoordinates) o;
     return Double.compare(that.latitude, latitude) == 0
         && Double.compare(that.longitude, longitude) == 0;

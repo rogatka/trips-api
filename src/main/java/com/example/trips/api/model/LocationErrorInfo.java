@@ -5,6 +5,7 @@ import java.util.Objects;
 public class LocationErrorInfo {
 
   private final String cause;
+
   private final String message;
 
   public LocationErrorInfo(String cause, String message) {
@@ -22,12 +23,12 @@ public class LocationErrorInfo {
 
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     LocationErrorInfo locationErrorInfo = (LocationErrorInfo) o;
     return Objects.equals(cause, locationErrorInfo.cause) && Objects.equals(message,
         locationErrorInfo.message);

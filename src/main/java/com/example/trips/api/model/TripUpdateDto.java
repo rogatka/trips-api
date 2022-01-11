@@ -7,14 +7,15 @@ public class TripUpdateDto {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
-  private GeolocationCoordinates startDestinationCoordinates;
-  private GeolocationCoordinates finalDestinationCoordinates;
-  private String ownerEmail;
-  private LocalDateTime startTime;
-  private LocalDateTime endTime;
+  private final GeolocationCoordinates startDestinationCoordinates;
 
-  public TripUpdateDto() {
-  }
+  private final GeolocationCoordinates finalDestinationCoordinates;
+
+  private final String ownerEmail;
+
+  private final LocalDateTime startTime;
+
+  private final LocalDateTime endTime;
 
   public TripUpdateDto(GeolocationCoordinates startDestinationCoordinates,
       GeolocationCoordinates finalDestinationCoordinates, String ownerEmail,
@@ -30,50 +31,30 @@ public class TripUpdateDto {
     return startTime;
   }
 
-  public void setStartTime(LocalDateTime startTime) {
-    this.startTime = startTime;
-  }
-
   public LocalDateTime getEndTime() {
     return endTime;
-  }
-
-  public void setEndTime(LocalDateTime endTime) {
-    this.endTime = endTime;
   }
 
   public GeolocationCoordinates getStartDestinationCoordinates() {
     return startDestinationCoordinates;
   }
 
-  public void setStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
-    this.startDestinationCoordinates = startDestinationCoordinates;
-  }
-
   public GeolocationCoordinates getFinalDestinationCoordinates() {
     return finalDestinationCoordinates;
-  }
-
-  public void setFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
-    this.finalDestinationCoordinates = finalDestinationCoordinates;
   }
 
   public String getOwnerEmail() {
     return ownerEmail;
   }
 
-  public void setOwnerEmail(String ownerEmail) {
-    this.ownerEmail = ownerEmail;
-  }
-
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     TripUpdateDto that = (TripUpdateDto) o;
     return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime)
         && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
@@ -96,5 +77,54 @@ public class TripUpdateDto {
         ", finalDestinationCoordinates=" + finalDestinationCoordinates +
         ", ownerEmail=" + EMAIL_OBFUSCATED +
         '}';
+  }
+
+  public static class Builder {
+
+    private GeolocationCoordinates startDestinationCoordinates;
+
+    private GeolocationCoordinates finalDestinationCoordinates;
+
+    private String ownerEmail;
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
+    public Builder withStartDestinationCoordinates(
+        GeolocationCoordinates startDestinationCoordinates) {
+      this.startDestinationCoordinates = startDestinationCoordinates;
+      return this;
+    }
+
+    public Builder withFinalDestinationCoordinates(
+        GeolocationCoordinates finalDestinationCoordinates) {
+      this.finalDestinationCoordinates = finalDestinationCoordinates;
+      return this;
+    }
+
+    public Builder withOwnerEmail(String ownerEmail) {
+      this.ownerEmail = ownerEmail;
+      return this;
+    }
+
+    public Builder withStartTime(LocalDateTime startTime) {
+      this.startTime = startTime;
+      return this;
+    }
+
+    public Builder withEndTime(LocalDateTime endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
+    public TripUpdateDto build() {
+      return new TripUpdateDto(this.startDestinationCoordinates, this.finalDestinationCoordinates,
+          this.ownerEmail, this.startTime, this.endTime);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
 }

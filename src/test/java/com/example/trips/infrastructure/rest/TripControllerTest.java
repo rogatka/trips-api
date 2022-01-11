@@ -25,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -37,13 +38,21 @@ import org.springframework.test.web.servlet.MockMvc;
 class TripControllerTest {
 
   private static final LocalDateTime CREATION_TIME = LocalDateTime.of(2021, 12, 25, 1, 1, 1, 1);
+
   private static final LocalDateTime START_TIME = LocalDateTime.of(2021, 12, 26, 1, 1, 1, 1);
+
   private static final LocalDateTime END_TIME = LocalDateTime.of(2021, 12, 27, 1, 1, 1, 1);
+
   private static final double LATITUDE = 55.555555;
+
   private static final double LONGITUDE = 44.444444;
+
   private static final String START_LOCATION_COUNTRY = "Russia";
+
   private static final String START_LOCATION_LOCALITY = "Moscow";
+
   private static final String FINAL_LOCATION_COUNTRY = "Unites States";
+
   private static final String FINAL_LOCATION_LOCALITY = "Las Vegas";
 
   @Autowired
@@ -55,8 +64,16 @@ class TripControllerTest {
   @MockBean
   private TripMessageProcessor tripMessageProcessor;
 
-  @SpyBean
+  @MockBean
   private AuthenticationProperties authenticationProperties;
+
+  @SpyBean
+  private TripResponseMapper tripResponseMapper;
+
+  @BeforeEach
+  void setUp() {
+    when(authenticationProperties.getSecret()).thenReturn("test");
+  }
 
   @Test
   void shouldReturn_403_Forbidden_IfInvalidBearerToken() throws Exception {
@@ -83,16 +100,17 @@ class TripControllerTest {
   @Test
   void shouldReturnTrip_And_200_OK_IfTripFoundById() throws Exception {
     String id = "test";
-    Trip trip = new Trip();
-    trip.setId(id);
-    trip.setStartDestination(
-        buildGeolocationData(LONGITUDE, LATITUDE, START_LOCATION_COUNTRY, START_LOCATION_LOCALITY));
-    trip.setFinalDestination(
-        buildGeolocationData(LONGITUDE, LATITUDE, FINAL_LOCATION_COUNTRY, FINAL_LOCATION_LOCALITY));
-    trip.setOwnerEmail("test@mail.com");
-    trip.setDateCreated(CREATION_TIME);
-    trip.setStartTime(START_TIME);
-    trip.setEndTime(END_TIME);
+    Trip trip = Trip.builder()
+        .withId(id)
+        .withStartDestination(buildGeolocationData(LONGITUDE, LATITUDE, START_LOCATION_COUNTRY,
+            START_LOCATION_LOCALITY))
+        .withFinalDestination(buildGeolocationData(LONGITUDE, LATITUDE, FINAL_LOCATION_COUNTRY,
+            FINAL_LOCATION_LOCALITY))
+        .withOwnerEmail("test@mail.com")
+        .withDateCreated(CREATION_TIME)
+        .withStartTime(START_TIME)
+        .withEndTime(END_TIME)
+        .build();
     when(tripService.findById(id)).thenReturn(trip);
 
     mockMvc.perform(get("/trips/{id}", id)
@@ -138,10 +156,11 @@ class TripControllerTest {
     String email = "test@mail.com";
     List<Trip> trips = new ArrayList<>();
     for (int i = 1; i <= 5; i++) {
-      Trip trip = new Trip();
-      trip.setId(String.valueOf(i));
-      trip.setStartDestination(new GeolocationData());
-      trip.setFinalDestination(new GeolocationData());
+      Trip trip = Trip.builder()
+          .withId(String.valueOf(i))
+          .withStartDestination(new GeolocationData())
+          .withFinalDestination(new GeolocationData())
+          .build();
       trips.add(trip);
     }
     when(tripService.findAllByEmail(email)).thenReturn(trips);
@@ -156,7 +175,7 @@ class TripControllerTest {
 
   @Test
   void shouldReturn400_BadRequest_IfValidationFailedOnTripCreation() throws Exception {
-    TripCreateDto tripCreateDto = new TripCreateDto();
+    TripCreateDto tripCreateDto = TripCreateDto.builder().build();
     when(tripService.create(tripCreateDto)).thenThrow(ValidationException.class);
 
     mockMvc.perform(post("/trips")
@@ -168,10 +187,11 @@ class TripControllerTest {
 
   @Test
   void shouldReturnCreatedTrip_And_200_OK_OnSuccessfulTripCreation() throws Exception {
-    Trip trip = new Trip();
-    trip.setId("test");
-    trip.setStartDestination(new GeolocationData());
-    trip.setFinalDestination(new GeolocationData());
+    Trip trip = Trip.builder()
+        .withId("test")
+        .withStartDestination(new GeolocationData())
+        .withFinalDestination(new GeolocationData())
+        .build();
     when(tripService.create(any())).thenReturn(trip);
 
     mockMvc.perform(post("/trips")

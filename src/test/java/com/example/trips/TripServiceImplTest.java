@@ -31,9 +31,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class TripServiceImplTest {
 
   private static final String TRIP_ID = "test";
+
   private static final LocalDateTime START_TIME = LocalDateTime.of(2021, 12, 26, 1, 1, 1, 1);
+
   private static final LocalDateTime END_TIME = LocalDateTime.of(2021, 12, 27, 1, 1, 1, 1);
+
   private static final double LATITUDE = 55.555555;
+
   private static final double LONGITUDE = 44.444444;
 
   @Mock
@@ -48,43 +52,76 @@ class TripServiceImplTest {
     exception = assertThrows(ValidationException.class, () -> tripService.create(null));
     assertTrue(exception.getMessage().contains("TripCreateDto cannot be null"));
 
-    TripCreateDto tripCreateDto = new TripCreateDto();
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto1 = TripCreateDto.builder().build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto1));
     assertTrue(exception.getMessage().contains("Start destination coordinates cannot be null"));
 
-    tripCreateDto.setStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE));
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto2 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto2));
     assertTrue(exception.getMessage().contains("Final destination coordinates cannot be null"));
 
-    tripCreateDto.setFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE));
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto3 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto3));
     assertTrue(exception.getMessage().contains("Email cannot be null"));
 
-    tripCreateDto.setOwnerEmail("");
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto4 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("")
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto4));
     assertTrue(exception.getMessage().contains("Invalid email"));
 
-    tripCreateDto.setOwnerEmail("123");
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto5 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("123")
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto5));
     assertTrue(exception.getMessage().contains("Invalid email"));
 
-    tripCreateDto.setOwnerEmail("test@mail.com");
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto6 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto6));
     assertTrue(exception.getMessage().contains("Start time cannot be null"));
 
-    tripCreateDto.setStartTime(START_TIME);
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto7 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto7));
     assertTrue(exception.getMessage().contains("End time cannot be null"));
 
-    tripCreateDto.setEndTime(START_TIME.minusDays(10));
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    final TripCreateDto tripCreateDto8 = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(START_TIME.minusDays(10))
+        .build();
+    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto8));
     assertTrue(exception.getMessage().contains("End time should not be before start time"));
   }
 
   @Test
   void shouldSuccessfullyCreateTrip() {
-    TripCreateDto tripCreateDto = new TripCreateDto(new GeolocationCoordinates(LATITUDE, LONGITUDE),
-        new GeolocationCoordinates(LATITUDE, LONGITUDE), "test@mail.com", START_TIME, END_TIME);
+    final TripCreateDto tripCreateDto = TripCreateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(END_TIME)
+        .build();
     tripService.create(tripCreateDto);
     verify(tripRepository, times(1)).save(any(Trip.class));
   }
@@ -105,45 +142,72 @@ class TripServiceImplTest {
   @Test
   void shouldCheckRequiredFields_OnTripUpdate() {
     ValidationException exception;
-    Trip trip = buildTrip();
-    TripUpdateDto tripUpdateDto = new TripUpdateDto();
+    final TripUpdateDto tripUpdateDto1 = TripUpdateDto.builder().build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto1));
     assertTrue(exception.getMessage().contains("Start destination coordinates cannot be null"));
 
-    tripUpdateDto.setStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE));
+    final TripUpdateDto tripUpdateDto2 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto2));
     assertTrue(exception.getMessage().contains("Final destination coordinates cannot be null"));
 
-    tripUpdateDto.setFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE));
+    final TripUpdateDto tripUpdateDto3 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto3));
     assertTrue(exception.getMessage().contains("Email cannot be null"));
 
-    tripUpdateDto.setOwnerEmail("");
+    final TripUpdateDto tripUpdateDto4 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("")
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto4));
     assertTrue(exception.getMessage().contains("Invalid email"));
 
-    tripUpdateDto.setOwnerEmail("123");
+    final TripUpdateDto tripUpdateDto5 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("123")
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto5));
     assertTrue(exception.getMessage().contains("Invalid email"));
 
-    tripUpdateDto.setOwnerEmail("test@mail.com");
+    final TripUpdateDto tripUpdateDto6 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto6));
     assertTrue(exception.getMessage().contains("Start time cannot be null"));
 
-    tripUpdateDto.setStartTime(START_TIME);
+    final TripUpdateDto tripUpdateDto7 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto7));
     assertTrue(exception.getMessage().contains("End time cannot be null"));
 
-    tripUpdateDto.setEndTime(START_TIME.minusDays(10));
+    final TripUpdateDto tripUpdateDto8 = TripUpdateDto.builder()
+        .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(START_TIME.minusDays(10))
+        .build();
     exception = assertThrows(ValidationException.class,
-        () -> tripService.update(TRIP_ID, tripUpdateDto));
+        () -> tripService.update(TRIP_ID, tripUpdateDto8));
     assertTrue(exception.getMessage().contains("End time should not be before start time"));
   }
 
@@ -181,7 +245,7 @@ class TripServiceImplTest {
 
   @Test
   void shouldDeleteTripById_IfFound() {
-    Trip trip = new Trip();
+    Trip trip = Trip.builder().withId(TRIP_ID).build();
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.of(trip));
     tripService.deleteById(TRIP_ID);
     verify(tripRepository, times(1)).deleteById(TRIP_ID);
@@ -198,8 +262,7 @@ class TripServiceImplTest {
 
   @Test
   void shouldFindTripById() {
-    Trip trip = new Trip();
-    trip.setId(TRIP_ID);
+    Trip trip = Trip.builder().withId(TRIP_ID).build();
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.of(trip));
     Trip foundTrip = tripService.findById(TRIP_ID);
     assertEquals(TRIP_ID, foundTrip.getId());
@@ -218,8 +281,7 @@ class TripServiceImplTest {
     String email = "test@mail.com";
     List<Trip> trips = new ArrayList<>();
     for (int i = 1; i <= 5; i++) {
-      Trip trip = new Trip();
-      trip.setId(String.valueOf(i));
+      Trip trip = Trip.builder().withId(String.valueOf(i)).build();
       trips.add(trip);
     }
     when(tripRepository.findAllByEmail(email)).thenReturn(trips);
@@ -228,14 +290,14 @@ class TripServiceImplTest {
   }
 
   private Trip buildTrip() {
-    Trip trip = new Trip();
-    trip.setId(TRIP_ID);
-    trip.setStartDestination(buildGeolocationData());
-    trip.setFinalDestination(buildGeolocationData());
-    trip.setOwnerEmail("test@mail.com");
-    trip.setStartTime(START_TIME);
-    trip.setEndTime(END_TIME);
-    return trip;
+    return Trip.builder()
+        .withId(TRIP_ID)
+        .withStartDestination(buildGeolocationData())
+        .withFinalDestination(buildGeolocationData())
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(END_TIME)
+        .build();
   }
 
   private GeolocationData buildGeolocationData() {

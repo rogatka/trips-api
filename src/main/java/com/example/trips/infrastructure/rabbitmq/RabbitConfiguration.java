@@ -21,6 +21,12 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 @Configuration
 class RabbitConfiguration implements RabbitListenerConfigurer {
 
+  public static final String TRIPS_TOPIC = "trips";
+
+  public static final String TRIPS_ENRICHMENT_QUEUE = "enrichment-queue";
+
+  public static final String TRIPS_ENRICHMENT_BINDING_KEY = "trips.enrichment";
+
   @Bean
   public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
     return new RabbitAdmin(connectionFactory);
@@ -28,9 +34,9 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
 
   @Bean
   public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
-    TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getTrip().getExchange());
+    TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getExchange());
     Queue enrichmentQueue = QueueBuilder.durable(
-        rabbitProperties.getTrip().getEnrichmentQueueName()).build();
+        rabbitProperties.getEnrichmentQueueName()).build();
 
     return new Declarables(
         enrichmentQueue,
@@ -38,7 +44,7 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
         BindingBuilder
             .bind(enrichmentQueue)
             .to(tripsTopicExchange)
-            .with(rabbitProperties.getTrip().getEnrichmentQueueBindingKey()));
+            .with(rabbitProperties.getEnrichmentQueueBindingKey()));
   }
 
   @Override
@@ -60,9 +66,12 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
   }
 
   @Bean
-  public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory) {
+  public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory,
+      RabbitProperties rabbitProperties) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
+    rabbitTemplate.setExchange(rabbitProperties.getExchange());
+    rabbitTemplate.setRoutingKey(rabbitProperties.getEnrichmentQueueBindingKey());
     return rabbitTemplate;
   }
 

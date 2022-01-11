@@ -1,5 +1,9 @@
 package com.example.trips.infrastructure.rabbitmq;
 
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_BINDING_KEY;
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_QUEUE;
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_TOPIC;
+
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripMessageDto;
 import com.example.trips.api.repository.TripRepository;
@@ -20,7 +24,9 @@ class RabbitConsumer {
   private final Logger log = LoggerFactory.getLogger(RabbitConsumer.class);
 
   private final TripService tripService;
+
   private final TripRepository tripRepository;
+
   private final TripEnricher tripEnricher;
 
   public RabbitConsumer(TripService tripService,
@@ -31,15 +37,15 @@ class RabbitConsumer {
   }
 
   @RabbitListener(bindings = @QueueBinding(
-      value = @Queue(value = "enrichment-queue", durable = "true"),
-      exchange = @Exchange(value = "trips", type = ExchangeTypes.TOPIC), key = "trips.enrichment"))
+      value = @Queue(value = TRIPS_ENRICHMENT_QUEUE, durable = "true"),
+      exchange = @Exchange(value = TRIPS_TOPIC, type = ExchangeTypes.TOPIC), key = TRIPS_ENRICHMENT_BINDING_KEY))
   public void enrichTripAndSave(TripMessageDto messageDto) {
     try {
       Trip trip = tripService.findById(messageDto.getId());
       Trip enrichedTrip = tripEnricher.enrich(trip);
       tripRepository.save(enrichedTrip);
     } catch (Exception ex) {
-      log.error("Error while enriching trip's (id={}) location data. Message: {}",
+      log.error("Error while enriching trip with id={}. Message: {}",
           messageDto.getId(), ex.getMessage());
     }
   }

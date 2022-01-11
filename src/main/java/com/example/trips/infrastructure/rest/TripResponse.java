@@ -12,77 +12,66 @@ class TripResponse {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
-  private String id;
-  private LocalDateTime startTime;
-  private LocalDateTime endTime;
-  private GeolocationData startDestination;
-  private GeolocationData finalDestination;
-  private LocalDateTime dateCreated;
-  private String ownerEmail;
-  private List<LocationErrorInfo> locationErrors;
+  private final String id;
+
+  private final LocalDateTime startTime;
+
+  private final LocalDateTime endTime;
+
+  private final GeolocationData startDestination;
+
+  private final GeolocationData finalDestination;
+
+  private final LocalDateTime dateCreated;
+
+  private final String ownerEmail;
+
+  private final List<LocationErrorInfo> locationErrors;
+
+  private TripResponse(String id, LocalDateTime startTime, LocalDateTime endTime,
+      GeolocationData startDestination, GeolocationData finalDestination,
+      LocalDateTime dateCreated, String ownerEmail,
+      List<LocationErrorInfo> locationErrors) {
+    this.id = id;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.startDestination = startDestination;
+    this.finalDestination = finalDestination;
+    this.dateCreated = dateCreated;
+    this.ownerEmail = ownerEmail;
+    this.locationErrors = locationErrors;
+  }
 
   public String getId() {
     return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
   }
 
   public LocalDateTime getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(LocalDateTime startTime) {
-    this.startTime = startTime;
-  }
-
   public LocalDateTime getEndTime() {
     return endTime;
-  }
-
-  public void setEndTime(LocalDateTime endTime) {
-    this.endTime = endTime;
   }
 
   public GeolocationData getStartDestination() {
     return startDestination;
   }
 
-  public void setStartDestination(GeolocationData startDestination) {
-    this.startDestination = startDestination;
-  }
-
   public GeolocationData getFinalDestination() {
     return finalDestination;
-  }
-
-  public void setFinalDestination(GeolocationData finalDestination) {
-    this.finalDestination = finalDestination;
   }
 
   public LocalDateTime getDateCreated() {
     return dateCreated;
   }
 
-  public void setDateCreated(LocalDateTime dateCreated) {
-    this.dateCreated = dateCreated;
-  }
-
   public String getOwnerEmail() {
     return ownerEmail;
   }
 
-  public void setOwnerEmail(String ownerEmail) {
-    this.ownerEmail = ownerEmail;
-  }
-
   public List<LocationErrorInfo> getLocationErrors() {
     return locationErrors;
-  }
-
-  public void setLocationErrors(List<LocationErrorInfo> locationErrors) {
-    this.locationErrors = locationErrors;
   }
 
   @Override
@@ -119,5 +108,73 @@ class TripResponse {
         ", ownerEmail=" + EMAIL_OBFUSCATED +
         ", errors=" + locationErrors +
         '}';
+  }
+
+  public static class Builder {
+
+    private String id;
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
+    private GeolocationData startDestination;
+
+    private GeolocationData finalDestination;
+
+    private LocalDateTime dateCreated;
+
+    private String ownerEmail;
+
+    private List<LocationErrorInfo> locationErrors;
+
+    public Builder withId(String id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder withStartTime(LocalDateTime startTime) {
+      this.startTime = startTime;
+      return this;
+    }
+
+    public Builder withEndTime(LocalDateTime endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
+    public Builder withStartDestination(GeolocationData startDestination) {
+      this.startDestination = startDestination;
+      return this;
+    }
+
+    public Builder withFinalDestination(GeolocationData finalDestination) {
+      this.finalDestination = finalDestination;
+      return this;
+    }
+
+    public Builder withDateCreated(LocalDateTime dateCreated) {
+      this.dateCreated = dateCreated;
+      return this;
+    }
+
+    public Builder withOwnerEmail(String ownerEmail) {
+      this.ownerEmail = ownerEmail;
+      return this;
+    }
+
+    public Builder withLocationErrors(List<LocationErrorInfo> locationErrors) {
+      this.locationErrors = locationErrors;
+      return this;
+    }
+
+    public TripResponse build() {
+      return new TripResponse(this.id, this.startTime, this.endTime, this.startDestination,
+          this.finalDestination, this.dateCreated, this.ownerEmail, this.locationErrors);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder();
   }
 }

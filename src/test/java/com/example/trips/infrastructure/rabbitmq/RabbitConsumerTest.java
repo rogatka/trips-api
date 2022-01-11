@@ -26,19 +26,29 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class RabbitConsumerTest {
 
   private static final String TRIP_ID = "test";
+
   private static final LocalDateTime START_TIME = LocalDateTime.of(2021, 12, 26, 1, 1, 1, 1);
+
   private static final LocalDateTime END_TIME = LocalDateTime.of(2021, 12, 27, 1, 1, 1, 1);
+
   private static final double LATITUDE = 55.555555;
+
   private static final double LONGITUDE = 44.444444;
+
   private static final String START_LOCATION_COUNTRY = "Russia";
+
   private static final String START_LOCATION_LOCALITY = "Moscow";
+
   private static final String FINAL_LOCATION_COUNTRY = "Unites States";
+
   private static final String FINAL_LOCATION_LOCALITY = "Las Vegas";
 
   @Mock
   private TripService tripService;
+
   @Mock
   private TripRepository tripRepository;
+
   @Mock
   private TripEnricher tripEnricher;
 
@@ -47,8 +57,7 @@ class RabbitConsumerTest {
 
   @Test
   void shouldNotEnrichGeolocationData_IfTripNotFoundById() {
-    TripMessageDto tripMessageDto = new TripMessageDto();
-    tripMessageDto.setId(TRIP_ID);
+    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     when(tripService.findById(TRIP_ID)).thenThrow(NotFoundException.class);
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
     verifyNoInteractions(tripEnricher);
@@ -56,9 +65,8 @@ class RabbitConsumerTest {
 
   @Test
   void shouldNotEnrichTripGeolocationData_IfExceptionWhileInteractingWithTripEnricher() {
-    TripMessageDto tripMessageDto = new TripMessageDto();
-    tripMessageDto.setId(TRIP_ID);
-    Trip trip = new Trip();
+    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
+    Trip trip = Trip.builder().withId(TRIP_ID).build();
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
 
     when(tripEnricher.enrich(trip)).thenThrow(FeignException.class);
@@ -69,8 +77,7 @@ class RabbitConsumerTest {
 
   @Test
   void shouldSuccessfullyEnrichTripGeolocationData() {
-    TripMessageDto tripMessageDto = new TripMessageDto();
-    tripMessageDto.setId(TRIP_ID);
+    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     Trip trip = buildTrip();
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
 
@@ -89,14 +96,14 @@ class RabbitConsumerTest {
   }
 
   private Trip buildTrip() {
-    Trip trip = new Trip();
-    trip.setId(TRIP_ID);
-    trip.setStartDestination(buildGeolocationData());
-    trip.setFinalDestination(buildGeolocationData());
-    trip.setOwnerEmail("test@mail.com");
-    trip.setStartTime(START_TIME);
-    trip.setEndTime(END_TIME);
-    return trip;
+    return Trip.builder()
+        .withId(TRIP_ID)
+        .withStartDestination(buildGeolocationData())
+        .withFinalDestination(buildGeolocationData())
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(END_TIME)
+        .build();
   }
 
   private GeolocationData buildGeolocationData() {

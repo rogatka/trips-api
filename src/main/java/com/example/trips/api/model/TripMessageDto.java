@@ -1,6 +1,5 @@
 package com.example.trips.api.model;
 
-
 import java.util.Objects;
 
 public class TripMessageDto {
@@ -18,18 +17,14 @@ public class TripMessageDto {
     return id;
   }
 
-  public void setId(String id) {
-    this.id = id;
-  }
-
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     TripMessageDto that = (TripMessageDto) o;
     return Objects.equals(id, that.id);
   }

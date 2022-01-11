@@ -23,7 +23,6 @@ auth:
   secret: ${AUTH_SECRET:test}
 
 rabbit:
-  trip:
-    exchange: ${TRIP_EXCHANGE:trips}
-    enrichment-queue-name: ${TRIP_ENRICHMENT_QUEUE:enrichment-queue}
-    enrichment-queue-binding-key: ${TRIP_ENRICHMENT_QUEUE_BINDING_KEY:trips.enrichment}
+  exchange: ${TRIP_EXCHANGE:trips}
+  enrichment-queue-name: ${TRIP_ENRICHMENT_QUEUE:enrichment-queue}
+  enrichment-queue-binding-key: ${TRIP_ENRICHMENT_QUEUE_BINDING_KEY:trips.enrichment}

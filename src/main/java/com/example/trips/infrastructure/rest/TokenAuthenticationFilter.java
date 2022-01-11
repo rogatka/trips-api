@@ -18,6 +18,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 class TokenAuthenticationFilter extends OncePerRequestFilter {
 
   private static final int TOKEN_VALUE_INDEX = 7;
+
   private final AuthenticationProperties authenticationProperties;
 
   public TokenAuthenticationFilter(AuthenticationProperties authenticationProperties) {

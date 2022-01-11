@@ -5,8 +5,11 @@ import java.util.Objects;
 public class GeolocationData {
 
   private double latitude;
+
   private double longitude;
+
   private String country;
+
   private String locality;
 
   public double getLatitude() {
@@ -43,12 +46,12 @@ public class GeolocationData {
 
   @Override
   public boolean equals(Object o) {
-      if (this == o) {
-          return true;
-      }
-      if (o == null || getClass() != o.getClass()) {
-          return false;
-      }
+    if (this == o) {
+      return true;
+    }
+    if (o == null || getClass() != o.getClass()) {
+      return false;
+    }
     GeolocationData that = (GeolocationData) o;
     return Double.compare(that.latitude, latitude) == 0
         && Double.compare(that.longitude, longitude) == 0 && Objects.equals(country, that.country)

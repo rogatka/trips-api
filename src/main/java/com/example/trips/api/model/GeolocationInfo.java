@@ -5,6 +5,7 @@ import java.util.Objects;
 public class GeolocationInfo {
 
   private String country;
+
   private String locality;
 
   public String getCountry() {

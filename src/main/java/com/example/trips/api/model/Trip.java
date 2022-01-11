@@ -5,16 +5,21 @@ import java.util.Objects;
 
 public class Trip {
 
-  private String id;
-  private LocalDateTime startTime;
-  private LocalDateTime endTime;
-  private GeolocationData startDestination;
-  private GeolocationData finalDestination;
-  private LocalDateTime dateCreated;
-  private String ownerEmail;
+  private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
-  public Trip() {
-  }
+  private final String id;
+
+  private final LocalDateTime startTime;
+
+  private final LocalDateTime endTime;
+
+  private final GeolocationData startDestination;
+
+  private final GeolocationData finalDestination;
+
+  private final LocalDateTime dateCreated;
+
+  private final String ownerEmail;
 
   private Trip(String id,
       LocalDateTime startTime,
@@ -32,115 +37,32 @@ public class Trip {
     this.ownerEmail = ownerEmail;
   }
 
-  public static TripBuilder builder() {
-    return new TripBuilder();
-  }
-
-  public static class TripBuilder {
-
-    private String id;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private GeolocationData startDestination;
-    private GeolocationData finalDestination;
-    private LocalDateTime dateCreated;
-    private String ownerEmail;
-
-    public TripBuilder withId(String id) {
-      this.id = id;
-      return this;
-    }
-
-    public TripBuilder withStartTime(LocalDateTime startTime) {
-      this.startTime = startTime;
-      return this;
-    }
-
-    public TripBuilder withEndTime(LocalDateTime endTime) {
-      this.endTime = endTime;
-      return this;
-    }
-
-    public TripBuilder withStartDestination(GeolocationData startDestination) {
-      this.startDestination = startDestination;
-      return this;
-    }
-
-    public TripBuilder withFinalDestination(GeolocationData finalDestination) {
-      this.finalDestination = finalDestination;
-      return this;
-    }
-
-    public TripBuilder withDateCreated(LocalDateTime dateCreated) {
-      this.dateCreated = dateCreated;
-      return this;
-    }
-
-    public TripBuilder withOwnerEmail(String ownerEmail) {
-      this.ownerEmail = ownerEmail;
-      return this;
-    }
-
-    public Trip build() {
-      return new Trip(this.id, this.startTime, this.endTime, this.startDestination,
-          this.finalDestination, this.dateCreated, this.ownerEmail);
-    }
-  }
-
   public String getId() {
     return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
   }
 
   public LocalDateTime getStartTime() {
     return startTime;
   }
 
-  public void setStartTime(LocalDateTime startTime) {
-    this.startTime = startTime;
-  }
-
   public LocalDateTime getEndTime() {
     return endTime;
-  }
-
-  public void setEndTime(LocalDateTime endTime) {
-    this.endTime = endTime;
   }
 
   public GeolocationData getStartDestination() {
     return startDestination;
   }
 
-  public void setStartDestination(GeolocationData startDestination) {
-    this.startDestination = startDestination;
-  }
-
   public GeolocationData getFinalDestination() {
     return finalDestination;
-  }
-
-  public void setFinalDestination(GeolocationData finalDestination) {
-    this.finalDestination = finalDestination;
   }
 
   public LocalDateTime getDateCreated() {
     return dateCreated;
   }
 
-  public void setDateCreated(LocalDateTime dateCreated) {
-    this.dateCreated = dateCreated;
-  }
-
   public String getOwnerEmail() {
     return ownerEmail;
-  }
-
-  public void setOwnerEmail(String ownerEmail) {
-    this.ownerEmail = ownerEmail;
   }
 
   @Override
@@ -174,7 +96,79 @@ public class Trip {
         ", startDestination='" + startDestination + '\'' +
         ", finalDestination='" + finalDestination + '\'' +
         ", dateCreated=" + dateCreated +
-        ", ownerEmail='" + ownerEmail + '\'' +
+        ", ownerEmail=" + EMAIL_OBFUSCATED +
         '}';
+  }
+
+  public static class Builder {
+
+    private String id;
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
+    private GeolocationData startDestination;
+
+    private GeolocationData finalDestination;
+
+    private LocalDateTime dateCreated;
+
+    private String ownerEmail;
+
+    public Builder withId(String id) {
+      this.id = id;
+      return this;
+    }
+
+    public Builder withStartTime(LocalDateTime startTime) {
+      this.startTime = startTime;
+      return this;
+    }
+
+    public Builder withEndTime(LocalDateTime endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
+    public Builder withStartDestination(GeolocationData startDestination) {
+      this.startDestination = startDestination;
+      return this;
+    }
+
+    public Builder withFinalDestination(GeolocationData finalDestination) {
+      this.finalDestination = finalDestination;
+      return this;
+    }
+
+    public Builder withDateCreated(LocalDateTime dateCreated) {
+      this.dateCreated = dateCreated;
+      return this;
+    }
+
+    public Builder withOwnerEmail(String ownerEmail) {
+      this.ownerEmail = ownerEmail;
+      return this;
+    }
+
+    public Trip build() {
+      return new Trip(this.id, this.startTime, this.endTime, this.startDestination,
+          this.finalDestination, this.dateCreated, this.ownerEmail);
+    }
+  }
+
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  public static Builder builderFromExisting(Trip trip) {
+    return new Builder()
+        .withId(trip.getId())
+        .withDateCreated(trip.getDateCreated())
+        .withOwnerEmail(trip.getOwnerEmail())
+        .withStartTime(trip.getStartTime())
+        .withEndTime(trip.getEndTime())
+        .withStartDestination(trip.getStartDestination())
+        .withFinalDestination(trip.getFinalDestination());
   }
 }

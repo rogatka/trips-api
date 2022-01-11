@@ -17,14 +17,14 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 @EnableGlobalMethodSecurity(prePostEnabled = true, jsr250Enabled = true)
 class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
+  @Value("${web-security.debug-enabled}")
+  private boolean isDebugEnabled;
+
   private final AuthenticationProperties authenticationProperties;
 
   public SecurityConfiguration(AuthenticationProperties authenticationProperties) {
     this.authenticationProperties = authenticationProperties;
   }
-
-  @Value("${web-security.debug-enabled}")
-  private boolean isDebugEnabled;
 
   @Override
   @Bean

@@ -62,16 +62,16 @@ class TripLocationEnricherTest {
   }
 
   private Trip buildTrip() {
-    Trip trip = new Trip();
-    trip.setId(TRIP_ID);
-    trip.setStartDestination(
-        buildGeolocationData(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE));
-    trip.setFinalDestination(
-        buildGeolocationData(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE));
-    trip.setOwnerEmail("test@mail.com");
-    trip.setStartTime(START_TIME);
-    trip.setEndTime(END_TIME);
-    return trip;
+    return Trip.builder()
+        .withId(TRIP_ID)
+        .withStartDestination(
+            buildGeolocationData(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))
+        .withFinalDestination(
+            buildGeolocationData(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))
+        .withOwnerEmail("test@mail.com")
+        .withStartTime(START_TIME)
+        .withEndTime(END_TIME)
+        .build();
   }
 
   private GeolocationData buildGeolocationData(double latitude, double longitude) {

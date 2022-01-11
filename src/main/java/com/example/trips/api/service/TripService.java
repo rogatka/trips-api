@@ -1,6 +1,5 @@
 package com.example.trips.api.service;
 
-
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
 import com.example.trips.api.model.TripUpdateDto;

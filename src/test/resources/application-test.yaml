@@ -17,5 +17,3 @@ spring:
 geolocation-api:
   url: test
   api-key: test
-auth:
-  secret: test

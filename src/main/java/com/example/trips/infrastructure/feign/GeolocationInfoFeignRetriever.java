@@ -17,9 +17,11 @@ import org.springframework.stereotype.Component;
 class GeolocationInfoFeignRetriever implements GeolocationInfoRetriever {
 
   private static final Logger log = LoggerFactory.getLogger(GeolocationInfoFeignRetriever.class);
+
   private static final int RESULTS_LIMIT = 1;
 
   private final GeolocationProperties geolocationProperties;
+
   private final GeolocationFeignClient geolocationFeignClient;
 
   public GeolocationInfoFeignRetriever(GeolocationProperties geolocationProperties,

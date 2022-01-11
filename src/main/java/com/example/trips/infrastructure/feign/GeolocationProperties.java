@@ -1,28 +1,26 @@
 package com.example.trips.infrastructure.feign;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.boot.context.properties.ConstructorBinding;
 
-@Configuration
 @ConfigurationProperties(prefix = "geolocation-api")
+@ConstructorBinding
 class GeolocationProperties {
 
-  private String url;
-  private String apiKey;
+  private final String url;
+
+  private final String apiKey;
+
+  public GeolocationProperties(String url, String apiKey) {
+    this.url = url;
+    this.apiKey = apiKey;
+  }
 
   public String getUrl() {
     return url;
   }
 
-  public void setUrl(String url) {
-    this.url = url;
-  }
-
   public String getApiKey() {
     return apiKey;
-  }
-
-  public void setApiKey(String apiKey) {
-    this.apiKey = apiKey;
   }
 }
