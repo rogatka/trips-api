@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "url": "/reverse?limit=1&access_key=test&query=55.555555,44.444444"
+    "url": "/reverse?limit=1&access_key=test&query=55.555555%2C44.444444"
   },
   "response": {
     "status": 200,

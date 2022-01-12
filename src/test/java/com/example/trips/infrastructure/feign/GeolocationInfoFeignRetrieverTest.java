@@ -8,6 +8,8 @@ import com.example.trips.api.exception.InternalServerErrorException;
 import com.example.trips.api.model.GeolocationCoordinates;
 import feign.FeignException;
 import java.time.LocalDateTime;
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,8 +41,7 @@ class GeolocationInfoFeignRetrieverTest {
 
   @Test
   void shouldThrowInternalServerErrorException_OnFeignException() {
-    String startLocationQuery = String.format("%f,%f", START_LOCATION_LATITUDE,
-        START_LOCATION_LONGITUDE);
+    List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
     when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY,
         startLocationQuery)).thenThrow(FeignException.class);
     GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(
@@ -52,8 +53,7 @@ class GeolocationInfoFeignRetrieverTest {
 
   @Test
   void shouldVerifyFeignResponseBody() {
-    String startLocationQuery = String.format("%f,%f", START_LOCATION_LATITUDE,
-        START_LOCATION_LONGITUDE);
+    List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
     when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY,
         startLocationQuery)).thenReturn(ResponseEntity.ok().build());
     GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(

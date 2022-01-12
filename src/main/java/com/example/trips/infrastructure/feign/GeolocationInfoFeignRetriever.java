@@ -26,19 +26,17 @@ class GeolocationInfoFeignRetriever implements GeolocationInfoRetriever {
   private final GeolocationFeignClient geolocationFeignClient;
 
   GeolocationInfoFeignRetriever(GeolocationProperties geolocationProperties,
-                                       GeolocationFeignClient geolocationFeignClient) {
+                                GeolocationFeignClient geolocationFeignClient) {
     this.geolocationProperties = geolocationProperties;
     this.geolocationFeignClient = geolocationFeignClient;
   }
 
   @Override
   public GeolocationInfo retrieve(GeolocationCoordinates geolocationCoordinates) {
-    String startLocationQuery = String.format("%f,%f", geolocationCoordinates.getLatitude(),
-      geolocationCoordinates.getLongitude());
+    List<Double> startLocationQuery = List.of(geolocationCoordinates.getLatitude(), geolocationCoordinates.getLongitude());
     ResponseEntity<GeolocationInfoFeignResponse> geolocationInfoFeignResponse;
     try {
-      geolocationInfoFeignResponse = geolocationFeignClient.getLocation(RESULTS_LIMIT, geolocationProperties.getApiKey(),
-        startLocationQuery);
+      geolocationInfoFeignResponse = geolocationFeignClient.getLocation(RESULTS_LIMIT, geolocationProperties.getApiKey(), startLocationQuery);
     } catch (FeignException e) {
       log.error("Exception when trying to get geolocation data for coordinates: {}", geolocationCoordinates);
       throw new InternalServerErrorException(String.format("Exception when trying to get geolocation data " +
