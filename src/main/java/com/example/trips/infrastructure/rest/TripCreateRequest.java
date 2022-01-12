@@ -1,6 +1,7 @@
 package com.example.trips.infrastructure.rest;
 
 import com.example.trips.api.model.GeolocationCoordinates;
+
 import java.time.LocalDateTime;
 import java.util.Objects;
 
@@ -67,26 +68,26 @@ class TripCreateRequest {
       return false;
     }
     TripCreateRequest that = (TripCreateRequest) o;
-    return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime)
-        && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
-        && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates)
-        && Objects.equals(ownerEmail, that.ownerEmail);
+    return Objects.equals(startTime, that.startTime)
+      && Objects.equals(endTime, that.endTime)
+      && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
+      && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates)
+      && Objects.equals(ownerEmail, that.ownerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(startTime, endTime, startDestinationCoordinates,
-        finalDestinationCoordinates, ownerEmail);
+    return Objects.hash(startTime, endTime, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail);
   }
 
   @Override
   public String toString() {
     return "TripCreateRequest{" +
-        "startTime=" + startTime +
-        ", endTime=" + endTime +
-        ", startDestinationCoordinates=" + startDestinationCoordinates +
-        ", finalDestinationCoordinates=" + finalDestinationCoordinates +
-        ", ownerEmail=" + EMAIL_OBFUSCATED +
-        '}';
+      "startTime=" + startTime +
+      ", endTime=" + endTime +
+      ", startDestinationCoordinates=" + startDestinationCoordinates +
+      ", finalDestinationCoordinates=" + finalDestinationCoordinates +
+      ", ownerEmail=" + EMAIL_OBFUSCATED +
+      '}';
   }
 }

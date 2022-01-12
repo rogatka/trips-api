@@ -19,7 +19,7 @@ import com.example.trips.api.exception.ValidationException;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
-import com.example.trips.api.service.TripMessageProcessor;
+import com.example.trips.api.service.TripMessagePublisher;
 import com.example.trips.api.service.TripService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -62,13 +62,13 @@ class TripControllerTest {
   private TripService tripService;
 
   @MockBean
-  private TripMessageProcessor tripMessageProcessor;
+  private TripMessagePublisher tripMessagePublisher;
 
   @MockBean
   private AuthenticationProperties authenticationProperties;
 
   @SpyBean
-  private TripResponseMapper tripResponseMapper;
+  private TripMapper tripMapper;
 
   @BeforeEach
   void setUp() {
@@ -186,7 +186,7 @@ class TripControllerTest {
   }
 
   @Test
-  void shouldReturnCreatedTrip_And_200_OK_OnSuccessfulTripCreation() throws Exception {
+  void shouldReturnCreatedTrip_And_201_OK_OnSuccessfulTripCreation() throws Exception {
     Trip trip = Trip.builder()
         .withId("test")
         .withStartDestination(new GeolocationData())
@@ -210,7 +210,7 @@ class TripControllerTest {
                 "    \"endTime\": \"2021-12-27T01:01:01.001\"\n" +
                 "}")
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
-        .andExpect(status().isOk())
+        .andExpect(status().isCreated())
         .andExpect(jsonPath("$.id", is(trip.getId())));
   }
 

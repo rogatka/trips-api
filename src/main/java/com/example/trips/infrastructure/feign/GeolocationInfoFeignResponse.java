@@ -1,6 +1,7 @@
 package com.example.trips.infrastructure.feign;
 
 import com.example.trips.api.model.GeolocationInfo;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -8,11 +9,11 @@ class GeolocationInfoFeignResponse {
 
   private List<GeolocationInfo> data;
 
-  public List<GeolocationInfo> getData() {
+  List<GeolocationInfo> getData() {
     return data;
   }
 
-  public void setData(List<GeolocationInfo> data) {
+  void setData(List<GeolocationInfo> data) {
     this.data = data;
   }
 
@@ -36,7 +37,7 @@ class GeolocationInfoFeignResponse {
   @Override
   public String toString() {
     return "GeolocationInfoFeignResponse{" +
-        "data=" + data +
-        '}';
+      "data=" + data +
+      '}';
   }
 }

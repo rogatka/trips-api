@@ -1,0 +1,9 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/reverse?limit=1&access_key=test&query=66.574690,-8.588608"
+  },
+  "response": {
+    "status": 500
+  }
+}

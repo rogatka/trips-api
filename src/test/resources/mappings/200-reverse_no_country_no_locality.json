@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/reverse?limit=1&access_key=test&query=6.411443,64.293438"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "latitude": 13.331119,
+          "longitude": 63.867501,
+          "type": "marinearea",
+          "distance": 771.708,
+          "name": "Arabian Sea",
+          "number": null,
+          "postal_code": null,
+          "street": null,
+          "confidence": 0.5,
+          "region": null,
+          "region_code": null,
+          "county": null,
+          "locality": null,
+          "administrative_area": null,
+          "neighbourhood": null,
+          "country": null,
+          "country_code": null,
+          "continent": null,
+          "label": "Arabian Sea"
+        }
+      ]
+    }
+  }
+}

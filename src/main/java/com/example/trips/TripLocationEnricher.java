@@ -12,8 +12,7 @@ class TripLocationEnricher implements TripEnricher {
 
   private final GeolocationInfoRetriever geolocationInfoRetriever;
 
-  public TripLocationEnricher(
-      GeolocationInfoRetriever geolocationInfoRetriever) {
+  TripLocationEnricher(GeolocationInfoRetriever geolocationInfoRetriever) {
     this.geolocationInfoRetriever = geolocationInfoRetriever;
   }
 
@@ -27,8 +26,7 @@ class TripLocationEnricher implements TripEnricher {
   private void enrichStartDestination(Trip trip) {
     double latitude = trip.getStartDestination().getLatitude();
     double longitude = trip.getStartDestination().getLongitude();
-    GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(
-        new GeolocationCoordinates(latitude, longitude));
+    GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(new GeolocationCoordinates(latitude, longitude));
     trip.getStartDestination().setCountry(geolocationInfo.getCountry());
     trip.getStartDestination().setLocality(geolocationInfo.getLocality());
   }
@@ -36,8 +34,7 @@ class TripLocationEnricher implements TripEnricher {
   private void enrichFinalDestination(Trip trip) {
     double latitude = trip.getFinalDestination().getLatitude();
     double longitude = trip.getFinalDestination().getLongitude();
-    GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(
-        new GeolocationCoordinates(latitude, longitude));
+    GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(new GeolocationCoordinates(latitude, longitude));
     trip.getFinalDestination().setCountry(geolocationInfo.getCountry());
     trip.getFinalDestination().setLocality(geolocationInfo.getLocality());
   }

@@ -33,8 +33,7 @@ public class GeolocationInfo {
       return false;
     }
     GeolocationInfo that = (GeolocationInfo) o;
-    return Objects.equals(country, that.country) && Objects.equals(locality,
-        that.locality);
+    return Objects.equals(country, that.country) && Objects.equals(locality, that.locality);
   }
 
   @Override
@@ -45,8 +44,8 @@ public class GeolocationInfo {
   @Override
   public String toString() {
     return "GeolocationInfo{" +
-        "country='" + country + '\'' +
-        ", locality='" + locality + '\'' +
-        '}';
+      "country='" + country + '\'' +
+      ", locality='" + locality + '\'' +
+      '}';
   }
 }

@@ -9,11 +9,11 @@ class AuthenticationProperties {
 
   private final String secret;
 
-  public AuthenticationProperties(String secret) {
+  AuthenticationProperties(String secret) {
     this.secret = secret;
   }
 
-  public String getSecret() {
+  String getSecret() {
     return secret;
   }
 }

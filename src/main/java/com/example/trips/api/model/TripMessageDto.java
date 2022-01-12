@@ -37,7 +37,7 @@ public class TripMessageDto {
   @Override
   public String toString() {
     return "TripMessageDto{" +
-        "id='" + id + '\'' +
-        '}';
+      "id='" + id + '\'' +
+      '}';
   }
 }

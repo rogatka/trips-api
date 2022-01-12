@@ -21,13 +21,8 @@ public class Trip {
 
   private final String ownerEmail;
 
-  private Trip(String id,
-      LocalDateTime startTime,
-      LocalDateTime endTime,
-      GeolocationData startDestination,
-      GeolocationData finalDestination,
-      LocalDateTime dateCreated,
-      String ownerEmail) {
+  private Trip(String id, LocalDateTime startTime, LocalDateTime endTime, GeolocationData startDestination,
+               GeolocationData finalDestination, LocalDateTime dateCreated, String ownerEmail) {
     this.id = id;
     this.startTime = startTime;
     this.endTime = endTime;
@@ -74,30 +69,31 @@ public class Trip {
       return false;
     }
     Trip trip = (Trip) o;
-    return Objects.equals(id, trip.id) && Objects.equals(startTime, trip.startTime)
-        && Objects.equals(endTime, trip.endTime) && Objects.equals(startDestination,
-        trip.startDestination) && Objects.equals(finalDestination, trip.finalDestination)
-        && Objects.equals(dateCreated, trip.dateCreated) && Objects.equals(ownerEmail,
-        trip.ownerEmail);
+    return Objects.equals(id, trip.id)
+      && Objects.equals(startTime, trip.startTime)
+      && Objects.equals(endTime, trip.endTime)
+      && Objects.equals(startDestination, trip.startDestination)
+      && Objects.equals(finalDestination, trip.finalDestination)
+      && Objects.equals(dateCreated, trip.dateCreated)
+      && Objects.equals(ownerEmail, trip.ownerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(id, startTime, endTime, startDestination, finalDestination, dateCreated,
-        ownerEmail);
+    return Objects.hash(id, startTime, endTime, startDestination, finalDestination, dateCreated, ownerEmail);
   }
 
   @Override
   public String toString() {
     return "Trip{" +
-        "id='" + id + '\'' +
-        ", startTime=" + startTime +
-        ", endTime=" + endTime +
-        ", startDestination='" + startDestination + '\'' +
-        ", finalDestination='" + finalDestination + '\'' +
-        ", dateCreated=" + dateCreated +
-        ", ownerEmail=" + EMAIL_OBFUSCATED +
-        '}';
+      "id='" + id + '\'' +
+      ", startTime=" + startTime +
+      ", endTime=" + endTime +
+      ", startDestination='" + startDestination + '\'' +
+      ", finalDestination='" + finalDestination + '\'' +
+      ", dateCreated=" + dateCreated +
+      ", ownerEmail=" + EMAIL_OBFUSCATED +
+      '}';
   }
 
   public static class Builder {
@@ -152,8 +148,8 @@ public class Trip {
     }
 
     public Trip build() {
-      return new Trip(this.id, this.startTime, this.endTime, this.startDestination,
-          this.finalDestination, this.dateCreated, this.ownerEmail);
+      return new Trip(this.id, this.startTime, this.endTime, this.startDestination, this.finalDestination,
+        this.dateCreated, this.ownerEmail);
     }
   }
 
@@ -163,12 +159,12 @@ public class Trip {
 
   public static Builder builderFromExisting(Trip trip) {
     return new Builder()
-        .withId(trip.getId())
-        .withDateCreated(trip.getDateCreated())
-        .withOwnerEmail(trip.getOwnerEmail())
-        .withStartTime(trip.getStartTime())
-        .withEndTime(trip.getEndTime())
-        .withStartDestination(trip.getStartDestination())
-        .withFinalDestination(trip.getFinalDestination());
+      .withId(trip.getId())
+      .withDateCreated(trip.getDateCreated())
+      .withOwnerEmail(trip.getOwnerEmail())
+      .withStartTime(trip.getStartTime())
+      .withEndTime(trip.getEndTime())
+      .withStartDestination(trip.getStartDestination())
+      .withFinalDestination(trip.getFinalDestination());
   }
 }

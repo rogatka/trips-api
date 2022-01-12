@@ -22,7 +22,7 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
   private final AuthenticationProperties authenticationProperties;
 
-  public SecurityConfiguration(AuthenticationProperties authenticationProperties) {
+  SecurityConfiguration(AuthenticationProperties authenticationProperties) {
     this.authenticationProperties = authenticationProperties;
   }
 
@@ -41,21 +41,20 @@ class SecurityConfiguration extends WebSecurityConfigurerAdapter {
   protected void configure(HttpSecurity httpSecurity) throws Exception {
     super.configure(httpSecurity);
     httpSecurity
-        .csrf().disable()
-        .cors()
-        .and()
-        .headers()
-        .xssProtection().xssProtectionEnabled(true)
-        .and()
-        .httpStrictTransportSecurity()
-        .and()
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .exceptionHandling().authenticationEntryPoint(new RestAuthenticationEntryPoint());
+      .csrf().disable()
+      .cors()
+      .and()
+      .headers()
+      .xssProtection().xssProtectionEnabled(true)
+      .and()
+      .httpStrictTransportSecurity()
+      .and()
+      .and()
+      .sessionManagement()
+      .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+      .and()
+      .exceptionHandling().authenticationEntryPoint(new RestAuthenticationEntryPoint());
 
-    httpSecurity.addFilterBefore(new TokenAuthenticationFilter(authenticationProperties),
-        LogoutFilter.class);
+    httpSecurity.addFilterBefore(new TokenAuthenticationFilter(authenticationProperties), LogoutFilter.class);
   }
 }

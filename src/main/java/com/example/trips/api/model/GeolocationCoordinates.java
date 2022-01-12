@@ -30,8 +30,7 @@ public class GeolocationCoordinates {
       return false;
     }
     GeolocationCoordinates that = (GeolocationCoordinates) o;
-    return Double.compare(that.latitude, latitude) == 0
-        && Double.compare(that.longitude, longitude) == 0;
+    return Double.compare(that.latitude, latitude) == 0 && Double.compare(that.longitude, longitude) == 0;
   }
 
   @Override
@@ -42,8 +41,8 @@ public class GeolocationCoordinates {
   @Override
   public String toString() {
     return "GeolocationData{" +
-        "latitude=" + latitude +
-        ", longitude=" + longitude +
-        '}';
+      "latitude=" + latitude +
+      ", longitude=" + longitude +
+      '}';
   }
 }

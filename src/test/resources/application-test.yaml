@@ -15,5 +15,11 @@ spring:
       reply-timeout: ${RABBIT_MQ_REPLY_TIMEOUT:3000}
 
 geolocation-api:
-  url: test
+  url: http://localhost:8090
   api-key: test
+auth:
+  secret: test
+rabbit:
+  exchange: trips
+  enrichment-queue-name: enrichment-queue
+  enrichment-queue-binding-key: trips.enrichment

@@ -54,8 +54,8 @@ public class GeolocationData {
     }
     GeolocationData that = (GeolocationData) o;
     return Double.compare(that.latitude, latitude) == 0
-        && Double.compare(that.longitude, longitude) == 0 && Objects.equals(country, that.country)
-        && Objects.equals(locality, that.locality);
+      && Double.compare(that.longitude, longitude) == 0 && Objects.equals(country, that.country)
+      && Objects.equals(locality, that.locality);
   }
 
   @Override
@@ -66,10 +66,10 @@ public class GeolocationData {
   @Override
   public String toString() {
     return "GeolocationData{" +
-        "latitude=" + latitude +
-        ", longitude=" + longitude +
-        ", country='" + country + '\'' +
-        ", locality='" + locality + '\'' +
-        '}';
+      "latitude=" + latitude +
+      ", longitude=" + longitude +
+      ", country='" + country + '\'' +
+      ", locality='" + locality + '\'' +
+      '}';
   }
 }

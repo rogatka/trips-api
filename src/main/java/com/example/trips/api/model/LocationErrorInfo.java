@@ -30,8 +30,8 @@ public class LocationErrorInfo {
       return false;
     }
     LocationErrorInfo locationErrorInfo = (LocationErrorInfo) o;
-    return Objects.equals(cause, locationErrorInfo.cause) && Objects.equals(message,
-        locationErrorInfo.message);
+    return Objects.equals(cause, locationErrorInfo.cause)
+      && Objects.equals(message, locationErrorInfo.message);
   }
 
   @Override
@@ -42,8 +42,8 @@ public class LocationErrorInfo {
   @Override
   public String toString() {
     return "ErrorInfo{" +
-        "cause='" + cause + '\'' +
-        ", message='" + message + '\'' +
-        '}';
+      "cause='" + cause + '\'' +
+      ", message='" + message + '\'' +
+      '}';
   }
 }

@@ -11,16 +11,16 @@ class GeolocationProperties {
 
   private final String apiKey;
 
-  public GeolocationProperties(String url, String apiKey) {
+  GeolocationProperties(String url, String apiKey) {
     this.url = url;
     this.apiKey = apiKey;
   }
 
-  public String getUrl() {
+  String getUrl() {
     return url;
   }
 
-  public String getApiKey() {
+  String getApiKey() {
     return apiKey;
   }
 }

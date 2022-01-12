@@ -9,8 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 interface GeolocationFeignClient {
 
   @GetMapping(value = "/reverse")
-  ResponseEntity<GeolocationInfoFeignResponse> getLocation(
-      @RequestParam(defaultValue = "1") int limit,
-      @RequestParam("access_key") String accessKey,
-      @RequestParam("query") String query);
+  ResponseEntity<GeolocationInfoFeignResponse> getLocation(@RequestParam(defaultValue = "1") int limit,
+                                                           @RequestParam("access_key") String accessKey,
+                                                           @RequestParam("query") String query);
 }

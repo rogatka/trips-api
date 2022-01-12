@@ -1,9 +1,5 @@
 package com.example.trips.infrastructure.rabbitmq;
 
-import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_BINDING_KEY;
-import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_QUEUE;
-import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_TOPIC;
-
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripMessageDto;
 import com.example.trips.api.repository.TripRepository;
@@ -18,6 +14,10 @@ import org.springframework.amqp.rabbit.annotation.QueueBinding;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Component;
 
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_BINDING_KEY;
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_ENRICHMENT_QUEUE;
+import static com.example.trips.infrastructure.rabbitmq.RabbitConfiguration.TRIPS_TOPIC;
+
 @Component
 class RabbitConsumer {
 
@@ -29,24 +29,21 @@ class RabbitConsumer {
 
   private final TripEnricher tripEnricher;
 
-  public RabbitConsumer(TripService tripService,
-      TripRepository tripRepository, TripEnricher tripEnricher) {
+  RabbitConsumer(TripService tripService, TripRepository tripRepository, TripEnricher tripEnricher) {
     this.tripService = tripService;
     this.tripRepository = tripRepository;
     this.tripEnricher = tripEnricher;
   }
 
-  @RabbitListener(bindings = @QueueBinding(
-      value = @Queue(value = TRIPS_ENRICHMENT_QUEUE, durable = "true"),
-      exchange = @Exchange(value = TRIPS_TOPIC, type = ExchangeTypes.TOPIC), key = TRIPS_ENRICHMENT_BINDING_KEY))
-  public void enrichTripAndSave(TripMessageDto messageDto) {
+  @RabbitListener(bindings = @QueueBinding(value = @Queue(value = TRIPS_ENRICHMENT_QUEUE, durable = "true"),
+    exchange = @Exchange(value = TRIPS_TOPIC, type = ExchangeTypes.TOPIC), key = TRIPS_ENRICHMENT_BINDING_KEY))
+  void enrichTripAndSave(TripMessageDto messageDto) {
     try {
       Trip trip = tripService.findById(messageDto.getId());
       Trip enrichedTrip = tripEnricher.enrich(trip);
       tripRepository.save(enrichedTrip);
     } catch (Exception ex) {
-      log.error("Error while enriching trip with id={}. Message: {}",
-          messageDto.getId(), ex.getMessage());
+      log.error("Error while enriching trip with id={}. Message: {}", messageDto.getId(), ex.getMessage());
     }
   }
 }

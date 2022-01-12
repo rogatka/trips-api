@@ -7,35 +7,27 @@ import org.springframework.boot.context.properties.ConstructorBinding;
 @ConstructorBinding
 class RabbitProperties {
 
-  private final String topic;
-
   private final String exchange;
 
   private final String enrichmentQueueName;
 
   private final String enrichmentQueueBindingKey;
 
-  public RabbitProperties(String topic, String exchange, String enrichmentQueueName,
-      String enrichmentQueueBindingKey) {
-    this.topic = topic;
+  RabbitProperties(String exchange, String enrichmentQueueName, String enrichmentQueueBindingKey) {
     this.exchange = exchange;
     this.enrichmentQueueName = enrichmentQueueName;
     this.enrichmentQueueBindingKey = enrichmentQueueBindingKey;
   }
 
-  public String getTopic() {
-    return topic;
-  }
-
-  public String getExchange() {
+  String getExchange() {
     return exchange;
   }
 
-  public String getEnrichmentQueueName() {
+  String getEnrichmentQueueName() {
     return enrichmentQueueName;
   }
 
-  public String getEnrichmentQueueBindingKey() {
+  String getEnrichmentQueueBindingKey() {
     return enrichmentQueueBindingKey;
   }
 }

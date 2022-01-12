@@ -6,3 +6,6 @@ To run application locally:
 - Register an account on 'www.positionstack.com' to get an **API_KEY**
 - Set **'GEOLOCATION_API_KEY'** env variable to your account's API_KEY or put it in application.yaml
 - Run the docker-compose.yml using **'docker compose up'**
+
+Before running integration tests:
+- Run the docker-compose file (src/test/resources/docker-compose.yml)

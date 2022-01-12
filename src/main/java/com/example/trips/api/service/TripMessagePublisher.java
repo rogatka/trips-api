@@ -2,7 +2,7 @@ package com.example.trips.api.service;
 
 import com.example.trips.api.model.TripMessageDto;
 
-public interface TripMessageProcessor {
+public interface TripMessagePublisher {
 
-  void process(TripMessageDto tripMessageDto);
+  void publishMessage(TripMessageDto tripMessageDto);
 }

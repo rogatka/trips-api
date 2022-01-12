@@ -17,16 +17,12 @@ public class TripCreateDto {
 
   private final LocalDateTime endTime;
 
-  private TripCreateDto(GeolocationCoordinates startDestinationCoordinates,
-      GeolocationCoordinates finalDestinationCoordinates,
-      String ownerEmail,
-      LocalDateTime startTime,
-      LocalDateTime endTime) {
-    this.startDestinationCoordinates = startDestinationCoordinates;
-    this.finalDestinationCoordinates = finalDestinationCoordinates;
-    this.ownerEmail = ownerEmail;
-    this.startTime = startTime;
-    this.endTime = endTime;
+  private TripCreateDto(Builder builder) {
+    this.startDestinationCoordinates = builder.startDestinationCoordinates;
+    this.finalDestinationCoordinates = builder.finalDestinationCoordinates;
+    this.ownerEmail = builder.ownerEmail;
+    this.startTime = builder.startTime;
+    this.endTime = builder.endTime;
   }
 
   public LocalDateTime getStartTime() {
@@ -58,27 +54,27 @@ public class TripCreateDto {
       return false;
     }
     TripCreateDto that = (TripCreateDto) o;
-    return Objects.equals(startTime, that.startTime) && Objects.equals(endTime, that.endTime)
-        && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
-        && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates)
-        && Objects.equals(ownerEmail, that.ownerEmail);
+    return Objects.equals(startTime, that.startTime)
+      && Objects.equals(endTime, that.endTime)
+      && Objects.equals(startDestinationCoordinates, that.startDestinationCoordinates)
+      && Objects.equals(finalDestinationCoordinates, that.finalDestinationCoordinates)
+      && Objects.equals(ownerEmail, that.ownerEmail);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(startTime, endTime, startDestinationCoordinates,
-        finalDestinationCoordinates, ownerEmail);
+    return Objects.hash(startTime, endTime, startDestinationCoordinates, finalDestinationCoordinates, ownerEmail);
   }
 
   @Override
   public String toString() {
     return "TripCreateDto{" +
-        "startTime=" + startTime +
-        ", endTime=" + endTime +
-        ", startDestinationCoordinates=" + startDestinationCoordinates +
-        ", finalDestinationCoordinates=" + finalDestinationCoordinates +
-        ", ownerEmail=" + EMAIL_OBFUSCATED +
-        '}';
+      "startTime=" + startTime +
+      ", endTime=" + endTime +
+      ", startDestinationCoordinates=" + startDestinationCoordinates +
+      ", finalDestinationCoordinates=" + finalDestinationCoordinates +
+      ", ownerEmail=" + EMAIL_OBFUSCATED +
+      '}';
   }
 
   public static class Builder {
@@ -93,14 +89,12 @@ public class TripCreateDto {
 
     private LocalDateTime endTime;
 
-    public Builder withStartDestinationCoordinates(
-        GeolocationCoordinates startDestinationCoordinates) {
+    public Builder withStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
       this.startDestinationCoordinates = startDestinationCoordinates;
       return this;
     }
 
-    public Builder withFinalDestinationCoordinates(
-        GeolocationCoordinates finalDestinationCoordinates) {
+    public Builder withFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
       this.finalDestinationCoordinates = finalDestinationCoordinates;
       return this;
     }
@@ -121,8 +115,7 @@ public class TripCreateDto {
     }
 
     public TripCreateDto build() {
-      return new TripCreateDto(this.startDestinationCoordinates, this.finalDestinationCoordinates,
-          this.ownerEmail, this.startTime, this.endTime);
+      return new TripCreateDto(this);
     }
   }
 

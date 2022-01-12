@@ -32,14 +32,12 @@ public class ExceptionHandlingAdvice {
   }
 
   @ExceptionHandler(InternalServerErrorException.class)
-  public final ResponseEntity<String> handleInternalServerErrorException(
-      InternalServerErrorException ex) {
+  public final ResponseEntity<String> handleInternalServerErrorException(InternalServerErrorException ex) {
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
   }
 
   @ExceptionHandler(AccessDeniedException.class)
   public final ResponseEntity<String> handleAccessDeniedException(AccessDeniedException ex) {
-    return new ResponseEntity<>("You don't have enough permissions to perform such request",
-        HttpStatus.FORBIDDEN);
+    return new ResponseEntity<>("You don't have enough permissions to perform such request", HttpStatus.FORBIDDEN);
   }
 }

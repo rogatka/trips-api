@@ -6,8 +6,10 @@ import com.example.trips.api.model.GeolocationCoordinates;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripMessageDto;
 import com.example.trips.api.model.TripUpdateDto;
 import com.example.trips.api.repository.TripRepository;
+import com.example.trips.api.service.TripMessagePublisher;
 import com.example.trips.api.service.TripService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,9 +19,12 @@ import org.springframework.stereotype.Service;
 @Service
 class TripServiceImpl implements TripService {
 
+  private final TripMessagePublisher tripMessagePublisher;
+
   private final TripRepository tripRepository;
 
-  public TripServiceImpl(TripRepository tripRepository) {
+  TripServiceImpl(TripMessagePublisher tripMessagePublisher, TripRepository tripRepository) {
+    this.tripMessagePublisher = tripMessagePublisher;
     this.tripRepository = tripRepository;
   }
 
@@ -38,7 +43,9 @@ class TripServiceImpl implements TripService {
   public Trip create(TripCreateDto tripCreateDto) {
     validateTripCreateDto(tripCreateDto);
     Trip trip = buildTripFromTripCreateDto(tripCreateDto);
-    return tripRepository.save(trip);
+    Trip savedTrip = tripRepository.save(trip);
+    tripMessagePublisher.publishMessage(new TripMessageDto(savedTrip.getId()));
+    return savedTrip;
   }
 
   @Override
@@ -47,7 +54,9 @@ class TripServiceImpl implements TripService {
     validateTripUpdateDto(tripUpdateDto);
     Trip trip = findById(id);
     Trip updatedTrip = updateTripFromTripUpdateDto(trip, tripUpdateDto);
-    return tripRepository.save(updatedTrip);
+    Trip savedTrip = tripRepository.save(updatedTrip);
+    tripMessagePublisher.publishMessage(new TripMessageDto(savedTrip.getId()));
+    return savedTrip;
   }
 
   @Override
@@ -82,35 +91,21 @@ class TripServiceImpl implements TripService {
     return Trip.builder()
         .withStartTime(tripCreateDto.getStartTime())
         .withEndTime(tripCreateDto.getEndTime())
-        .withStartDestination(
-            getStartDestinationData(tripCreateDto.getStartDestinationCoordinates()))
-        .withFinalDestination(
-            getFinalDestinationData(tripCreateDto.getFinalDestinationCoordinates()))
+        .withStartDestination(getStartDestinationData(tripCreateDto.getStartDestinationCoordinates()))
+        .withFinalDestination(getFinalDestinationData(tripCreateDto.getFinalDestinationCoordinates()))
         .withOwnerEmail(tripCreateDto.getOwnerEmail())
         .withDateCreated(LocalDateTime.now())
         .build();
   }
 
   private Trip updateTripFromTripUpdateDto(Trip trip, TripUpdateDto tripUpdateDto) {
-    Trip.Builder builder = Trip.builderFromExisting(trip);
-    if (tripUpdateDto.getStartDestinationCoordinates() != null) {
-      builder = builder.withStartDestination(
-          getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()));
-    }
-    if (tripUpdateDto.getFinalDestinationCoordinates() != null) {
-      builder = builder.withFinalDestination(
-          getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()));
-    }
-    if (tripUpdateDto.getStartTime() != null) {
-      builder = builder.withStartTime(tripUpdateDto.getStartTime());
-    }
-    if (tripUpdateDto.getEndTime() != null) {
-      builder = builder.withEndTime(tripUpdateDto.getEndTime());
-    }
-    if (tripUpdateDto.getOwnerEmail() != null) {
-      builder = builder.withOwnerEmail(tripUpdateDto.getOwnerEmail());
-    }
-    return builder.build();
+    return Trip.builderFromExisting(trip)
+        .withStartDestination(getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()))
+        .withFinalDestination(getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()))
+        .withStartTime(tripUpdateDto.getStartTime())
+        .withEndTime(tripUpdateDto.getEndTime())
+        .withOwnerEmail(tripUpdateDto.getOwnerEmail())
+        .build();
   }
 
   private GeolocationData getStartDestinationData(GeolocationCoordinates startDestination) {

@@ -21,11 +21,11 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 @Configuration
 class RabbitConfiguration implements RabbitListenerConfigurer {
 
-  public static final String TRIPS_TOPIC = "trips";
+  static final String TRIPS_TOPIC = "trips";
 
-  public static final String TRIPS_ENRICHMENT_QUEUE = "enrichment-queue";
+  static final String TRIPS_ENRICHMENT_QUEUE = "enrichment-queue";
 
-  public static final String TRIPS_ENRICHMENT_BINDING_KEY = "trips.enrichment";
+  static final String TRIPS_ENRICHMENT_BINDING_KEY = "trips.enrichment";
 
   @Bean
   public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {
@@ -35,16 +35,9 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
   @Bean
   public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
     TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getExchange());
-    Queue enrichmentQueue = QueueBuilder.durable(
-        rabbitProperties.getEnrichmentQueueName()).build();
-
-    return new Declarables(
-        enrichmentQueue,
-        tripsTopicExchange,
-        BindingBuilder
-            .bind(enrichmentQueue)
-            .to(tripsTopicExchange)
-            .with(rabbitProperties.getEnrichmentQueueBindingKey()));
+    Queue enrichmentQueue = QueueBuilder.durable(rabbitProperties.getEnrichmentQueueName()).build();
+    return new Declarables(enrichmentQueue, tripsTopicExchange,
+      BindingBuilder.bind(enrichmentQueue).to(tripsTopicExchange).with(rabbitProperties.getEnrichmentQueueBindingKey()));
   }
 
   @Override
@@ -54,8 +47,7 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
 
   @Bean
   public MessageHandlerMethodFactory messageHandlerMethodFactory() {
-    DefaultMessageHandlerMethodFactory messageHandlerMethodFactory
-        = new DefaultMessageHandlerMethodFactory();
+    DefaultMessageHandlerMethodFactory messageHandlerMethodFactory = new DefaultMessageHandlerMethodFactory();
     messageHandlerMethodFactory.setMessageConverter(consumerJackson2MessageConverter());
     return messageHandlerMethodFactory;
   }
@@ -66,8 +58,7 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
   }
 
   @Bean
-  public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory,
-      RabbitProperties rabbitProperties) {
+  public RabbitTemplate rabbitTemplate(final ConnectionFactory connectionFactory, RabbitProperties rabbitProperties) {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
     rabbitTemplate.setExchange(rabbitProperties.getExchange());
