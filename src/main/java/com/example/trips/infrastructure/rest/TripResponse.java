@@ -3,12 +3,15 @@ package com.example.trips.infrastructure.rest;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.LocationErrorInfo;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@JsonDeserialize(builder = TripResponse.Builder.class)
 class TripResponse {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
@@ -29,17 +32,15 @@ class TripResponse {
 
   private final List<LocationErrorInfo> locationErrors;
 
-  private TripResponse(String id, LocalDateTime startTime, LocalDateTime endTime, GeolocationData startDestination,
-                       GeolocationData finalDestination, LocalDateTime dateCreated, String ownerEmail,
-                       List<LocationErrorInfo> locationErrors) {
-    this.id = id;
-    this.startTime = startTime;
-    this.endTime = endTime;
-    this.startDestination = startDestination;
-    this.finalDestination = finalDestination;
-    this.dateCreated = dateCreated;
-    this.ownerEmail = ownerEmail;
-    this.locationErrors = locationErrors;
+  private TripResponse(Builder builder) {
+    this.id = builder.id;
+    this.startTime = builder.startTime;
+    this.endTime = builder.endTime;
+    this.startDestination = builder.startDestination;
+    this.finalDestination = builder.finalDestination;
+    this.dateCreated = builder.dateCreated;
+    this.ownerEmail = builder.ownerEmail;
+    this.locationErrors = builder.locationErrors;
   }
 
   public String getId() {
@@ -113,6 +114,7 @@ class TripResponse {
       '}';
   }
 
+  @JsonPOJOBuilder
   static class Builder {
 
     private String id;
@@ -172,8 +174,7 @@ class TripResponse {
     }
 
     public TripResponse build() {
-      return new TripResponse(this.id, this.startTime, this.endTime, this.startDestination,
-        this.finalDestination, this.dateCreated, this.ownerEmail, this.locationErrors);
+      return new TripResponse(this);
     }
   }
 

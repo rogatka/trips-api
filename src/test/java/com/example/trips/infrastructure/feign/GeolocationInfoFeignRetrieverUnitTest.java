@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 
 @ExtendWith(MockitoExtension.class)
-class GeolocationInfoFeignRetrieverTest {
+class GeolocationInfoFeignRetrieverUnitTest {
 
   private static final String GEOLOCATION_API_KEY = "test-api-key";
   private static final double START_LOCATION_LATITUDE = 55.555555;
@@ -41,24 +41,24 @@ class GeolocationInfoFeignRetrieverTest {
 
   @Test
   void shouldThrowInternalServerErrorException_OnFeignException() {
+    //given
     List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY,
-        startLocationQuery)).thenThrow(FeignException.class);
-    GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(
-        START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    InternalServerErrorException exception = assertThrows(InternalServerErrorException.class,
-        () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
+    GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
+    //when
+    when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY, startLocationQuery)).thenThrow(FeignException.class);
+    //then
+    InternalServerErrorException exception = assertThrows(InternalServerErrorException.class, () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
     assertTrue(exception.getMessage().contains("Exception when trying to get geolocation data"));
   }
 
   @Test
   void shouldVerifyFeignResponseBody() {
+    //given
     List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY,
-        startLocationQuery)).thenReturn(ResponseEntity.ok().build());
-    GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(
-        START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    assertThrows(NullPointerException.class,
-        () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
+    GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
+    //when
+    when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY, startLocationQuery)).thenReturn(ResponseEntity.ok().build());
+    //then
+    assertThrows(NullPointerException.class, () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
   }
 }

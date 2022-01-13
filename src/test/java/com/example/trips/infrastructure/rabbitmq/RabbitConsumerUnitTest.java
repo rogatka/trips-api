@@ -23,7 +23,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class RabbitConsumerTest {
+class RabbitConsumerUnitTest {
 
   private static final String TRIP_ID = "test";
 
@@ -57,33 +57,44 @@ class RabbitConsumerTest {
 
   @Test
   void shouldNotEnrichGeolocationData_IfTripNotFoundById() {
+    //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
+
+    //when
     when(tripService.findById(TRIP_ID)).thenThrow(NotFoundException.class);
+
+    //then
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
     verifyNoInteractions(tripEnricher);
   }
 
   @Test
   void shouldNotEnrichTripGeolocationData_IfExceptionWhileInteractingWithTripEnricher() {
+    //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     Trip trip = Trip.builder().withId(TRIP_ID).build();
-    when(tripService.findById(TRIP_ID)).thenReturn(trip);
 
+    //when
+    when(tripService.findById(TRIP_ID)).thenReturn(trip);
     when(tripEnricher.enrich(trip)).thenThrow(FeignException.class);
 
+    //then
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
     verify(tripRepository, times(0)).save(any(Trip.class));
   }
 
   @Test
   void shouldSuccessfullyEnrichTripGeolocationData() {
+    //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     Trip trip = buildTrip();
-    when(tripService.findById(TRIP_ID)).thenReturn(trip);
 
+    //when
+    when(tripService.findById(TRIP_ID)).thenReturn(trip);
     var enrichedTrip = enrichGeolocationDataAndGet(trip);
     when(tripEnricher.enrich(trip)).thenReturn(enrichedTrip);
 
+    //then
     Assertions.assertDoesNotThrow(() -> rabbitConsumer.enrichTripAndSave(tripMessageDto));
   }
 

@@ -21,11 +21,7 @@ import org.springframework.messaging.handler.annotation.support.MessageHandlerMe
 @Configuration
 class RabbitConfiguration implements RabbitListenerConfigurer {
 
-  static final String TRIPS_TOPIC = "trips";
-
   static final String TRIPS_ENRICHMENT_QUEUE = "enrichment-queue";
-
-  static final String TRIPS_ENRICHMENT_BINDING_KEY = "trips.enrichment";
 
   @Bean
   public AmqpAdmin amqpAdmin(final ConnectionFactory connectionFactory) {

@@ -43,9 +43,9 @@ class TripServiceImpl implements TripService {
   public Trip create(TripCreateDto tripCreateDto) {
     validateTripCreateDto(tripCreateDto);
     Trip trip = buildTripFromTripCreateDto(tripCreateDto);
-    Trip savedTrip = tripRepository.save(trip);
-    tripMessagePublisher.publishMessage(new TripMessageDto(savedTrip.getId()));
-    return savedTrip;
+    trip = tripRepository.save(trip);
+    tripMessagePublisher.publishMessage(new TripMessageDto(trip.getId()));
+    return trip;
   }
 
   @Override

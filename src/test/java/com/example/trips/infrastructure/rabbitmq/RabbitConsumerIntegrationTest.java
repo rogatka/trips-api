@@ -60,6 +60,7 @@ class RabbitConsumerIntegrationTest {
     Trip trip = buildTrip(RUSSIA_MOSCOW_LATITUDE, RUSSIA_MOSCOW_LONGITUDE, USA_WASHINGTON_LATITUDE, USA_WASHINGTON_LONGITUDE);
     Trip savedTrip = tripRepository.save(trip);
     TripMessageDto tripMessageDto = new TripMessageDto(savedTrip.getId());
+
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
 
     Optional<Trip> enrichedTripOptional = tripRepository.findById(savedTrip.getId());
@@ -76,6 +77,7 @@ class RabbitConsumerIntegrationTest {
     Trip trip = buildTrip(RUSSIA_UNKNOWN_LOCALITY_LATITUDE, RUSSIA_UNKNOWN_LOCALITY_LONGITUDE, USA_WASHINGTON_LATITUDE, USA_WASHINGTON_LONGITUDE);
     Trip savedTrip = tripRepository.save(trip);
     TripMessageDto tripMessageDto = new TripMessageDto(savedTrip.getId());
+
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
 
     Optional<Trip> enrichedTripOptional = tripRepository.findById(savedTrip.getId());
@@ -92,6 +94,7 @@ class RabbitConsumerIntegrationTest {
     Trip trip = buildTrip(UNKNOWN_LOCATION_LATITUDE, UNKNOWN_LOCATION_LONGITUDE, USA_WASHINGTON_LATITUDE, USA_WASHINGTON_LONGITUDE);
     Trip savedTrip = tripRepository.save(trip);
     TripMessageDto tripMessageDto = new TripMessageDto(savedTrip.getId());
+
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
 
     Optional<Trip> enrichedTripOptional = tripRepository.findById(savedTrip.getId());
@@ -108,6 +111,7 @@ class RabbitConsumerIntegrationTest {
     Trip trip = buildTrip(RUSSIA_MOSCOW_LATITUDE, RUSSIA_MOSCOW_LONGITUDE, LATITUDE_500_ERROR, LONGITUDE_500_ERROR);
     Trip savedTrip = tripRepository.save(trip);
     TripMessageDto tripMessageDto = new TripMessageDto(savedTrip.getId());
+
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
 
     Optional<Trip> foundTripOptional = tripRepository.findById(savedTrip.getId());

@@ -17,7 +17,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
-class TripLocationEnricherTest {
+class TripLocationEnricherUnitTest {
 
   private static final String TRIP_ID = "test";
   private static final double START_LOCATION_LATITUDE = 55.555555;
@@ -41,19 +41,16 @@ class TripLocationEnricherTest {
 
   @Test
   void shouldSuccessfullyEnrichTripGeolocationData() {
+    //given
     Trip trip = buildTrip();
-    GeolocationInfo startGeolocationInfo = new GeolocationInfo();
-    startGeolocationInfo.setCountry(START_LOCATION_COUNTRY);
-    startGeolocationInfo.setLocality(START_LOCATION_LOCALITY);
-    when(geolocationInfoRetriever.retrieve(
-        new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))).thenReturn(
-        startGeolocationInfo);
-    GeolocationInfo finalGeolocationInfo = new GeolocationInfo();
-    finalGeolocationInfo.setCountry(FINAL_LOCATION_COUNTRY);
-    finalGeolocationInfo.setLocality(FINAL_LOCATION_LOCALITY);
-    when(geolocationInfoRetriever.retrieve(
-        new GeolocationCoordinates(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))).thenReturn(
-        finalGeolocationInfo);
+
+    //when
+    GeolocationInfo startGeolocationInfo = buildGeolocationInfo(START_LOCATION_COUNTRY, START_LOCATION_LOCALITY);
+    when(geolocationInfoRetriever.retrieve(new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))).thenReturn(startGeolocationInfo);
+    GeolocationInfo finalGeolocationInfo = buildGeolocationInfo(FINAL_LOCATION_COUNTRY, FINAL_LOCATION_LOCALITY);
+    when(geolocationInfoRetriever.retrieve(new GeolocationCoordinates(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))).thenReturn(finalGeolocationInfo);
+
+    //then
     var enrichedTrip = tripLocationEnricher.enrich(trip);
     assertEquals(START_LOCATION_COUNTRY, enrichedTrip.getStartDestination().getCountry());
     assertEquals(START_LOCATION_LOCALITY, enrichedTrip.getStartDestination().getLocality());
@@ -61,13 +58,18 @@ class TripLocationEnricherTest {
     assertEquals(FINAL_LOCATION_LOCALITY, enrichedTrip.getFinalDestination().getLocality());
   }
 
+  private GeolocationInfo buildGeolocationInfo(String startLocationCountry, String startLocationLocality) {
+    GeolocationInfo startGeolocationInfo = new GeolocationInfo();
+    startGeolocationInfo.setCountry(startLocationCountry);
+    startGeolocationInfo.setLocality(startLocationLocality);
+    return startGeolocationInfo;
+  }
+
   private Trip buildTrip() {
     return Trip.builder()
         .withId(TRIP_ID)
-        .withStartDestination(
-            buildGeolocationData(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))
-        .withFinalDestination(
-            buildGeolocationData(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))
+        .withStartDestination(buildGeolocationData(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))
+        .withFinalDestination(buildGeolocationData(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))
         .withOwnerEmail("test@mail.com")
         .withStartTime(START_TIME)
         .withEndTime(END_TIME)

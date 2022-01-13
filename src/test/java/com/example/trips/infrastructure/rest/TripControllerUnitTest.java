@@ -35,7 +35,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 @WebMvcTest(TripController.class)
-class TripControllerTest {
+class TripControllerUnitTest {
 
   private static final LocalDateTime CREATION_TIME = LocalDateTime.of(2021, 12, 25, 1, 1, 1, 1);
 
@@ -77,20 +77,27 @@ class TripControllerTest {
 
   @Test
   void shouldReturn_403_Forbidden_IfInvalidBearerToken() throws Exception {
+    //given
     String id = "test";
+
+    //then
     mockMvc.perform(get("/trips/{id}", id)
-            .header("Authorization", "Bearer " + "invalid token"))
+        .header("Authorization", "Bearer " + "invalid token"))
         .andExpect(status().isForbidden())
         .andExpect(status().reason(containsString("Invalid Bearer token value")));
   }
 
   @Test
   void shouldReturn_404_NotFound_IfTripNotFoundById() throws Exception {
+    //given
     String id = "test";
+
+    //when
     String notFoundMessage = String.format("Trip with id=%s not found", id);
     NotFoundException notFoundException = new NotFoundException(notFoundMessage);
     when(tripService.findById(id)).thenThrow(notFoundException);
 
+    //then
     mockMvc.perform(get("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNotFound())
@@ -99,40 +106,34 @@ class TripControllerTest {
 
   @Test
   void shouldReturnTrip_And_200_OK_IfTripFoundById() throws Exception {
+    //given
     String id = "test";
     Trip trip = Trip.builder()
         .withId(id)
-        .withStartDestination(buildGeolocationData(LONGITUDE, LATITUDE, START_LOCATION_COUNTRY,
-            START_LOCATION_LOCALITY))
-        .withFinalDestination(buildGeolocationData(LONGITUDE, LATITUDE, FINAL_LOCATION_COUNTRY,
-            FINAL_LOCATION_LOCALITY))
+        .withStartDestination(buildGeolocationData(LONGITUDE, LATITUDE, START_LOCATION_COUNTRY, START_LOCATION_LOCALITY))
+        .withFinalDestination(buildGeolocationData(LONGITUDE, LATITUDE, FINAL_LOCATION_COUNTRY, FINAL_LOCATION_LOCALITY))
         .withOwnerEmail("test@mail.com")
         .withDateCreated(CREATION_TIME)
         .withStartTime(START_TIME)
         .withEndTime(END_TIME)
         .build();
+
+    //when
     when(tripService.findById(id)).thenReturn(trip);
 
+    //then
     mockMvc.perform(get("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isOk())
         .andExpect(jsonPath("$.id", is(trip.getId())))
-        .andExpect(
-            jsonPath("$.startDestination.longitude", is(trip.getStartDestination().getLongitude())))
-        .andExpect(
-            jsonPath("$.startDestination.latitude", is(trip.getStartDestination().getLatitude())))
-        .andExpect(
-            jsonPath("$.startDestination.country", is(trip.getStartDestination().getCountry())))
-        .andExpect(
-            jsonPath("$.startDestination.locality", is(trip.getStartDestination().getLocality())))
-        .andExpect(
-            jsonPath("$.finalDestination.longitude", is(trip.getFinalDestination().getLongitude())))
-        .andExpect(
-            jsonPath("$.finalDestination.latitude", is(trip.getFinalDestination().getLatitude())))
-        .andExpect(
-            jsonPath("$.finalDestination.country", is(trip.getFinalDestination().getCountry())))
-        .andExpect(
-            jsonPath("$.finalDestination.locality", is(trip.getFinalDestination().getLocality())))
+        .andExpect(jsonPath("$.startDestination.longitude", is(trip.getStartDestination().getLongitude())))
+        .andExpect(jsonPath("$.startDestination.latitude", is(trip.getStartDestination().getLatitude())))
+        .andExpect(jsonPath("$.startDestination.country", is(trip.getStartDestination().getCountry())))
+        .andExpect(jsonPath("$.startDestination.locality", is(trip.getStartDestination().getLocality())))
+        .andExpect(jsonPath("$.finalDestination.longitude", is(trip.getFinalDestination().getLongitude())))
+        .andExpect(jsonPath("$.finalDestination.latitude", is(trip.getFinalDestination().getLatitude())))
+        .andExpect(jsonPath("$.finalDestination.country", is(trip.getFinalDestination().getCountry())))
+        .andExpect(jsonPath("$.finalDestination.locality", is(trip.getFinalDestination().getLocality())))
         .andExpect(jsonPath("$.startTime", is(trip.getStartTime().toString())))
         .andExpect(jsonPath("$.endTime", is(trip.getEndTime().toString())))
         .andExpect(jsonPath("$.dateCreated", is(trip.getDateCreated().toString())))
@@ -141,9 +142,13 @@ class TripControllerTest {
 
   @Test
   void shouldReturnEmptyCollectionInResponse_200_OK_IfTripsNotFoundByEmail() throws Exception {
+    //given
     String email = "test@mail.com";
+
+    //when
     when(tripService.findAllByEmail(email)).thenReturn(Collections.emptyList());
 
+    //then
     mockMvc.perform(get("/trips")
             .queryParam("email", email)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
@@ -153,18 +158,14 @@ class TripControllerTest {
 
   @Test
   void shouldReturnAllTrips_200_OK_IfTripsFoundByEmail() throws Exception {
+    //given
     String email = "test@mail.com";
-    List<Trip> trips = new ArrayList<>();
-    for (int i = 1; i <= 5; i++) {
-      Trip trip = Trip.builder()
-          .withId(String.valueOf(i))
-          .withStartDestination(new GeolocationData())
-          .withFinalDestination(new GeolocationData())
-          .build();
-      trips.add(trip);
-    }
+    List<Trip> trips = buildTrips();
+
+    //when
     when(tripService.findAllByEmail(email)).thenReturn(trips);
 
+    //then
     mockMvc.perform(get("/trips")
             .queryParam("email", email)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
@@ -175,9 +176,13 @@ class TripControllerTest {
 
   @Test
   void shouldReturn400_BadRequest_IfValidationFailedOnTripCreation() throws Exception {
+    //given
     TripCreateDto tripCreateDto = TripCreateDto.builder().build();
+
+    //when
     when(tripService.create(tripCreateDto)).thenThrow(ValidationException.class);
 
+    //then
     mockMvc.perform(post("/trips")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{}")
@@ -187,13 +192,17 @@ class TripControllerTest {
 
   @Test
   void shouldReturnCreatedTrip_And_201_OK_OnSuccessfulTripCreation() throws Exception {
+    //given
     Trip trip = Trip.builder()
         .withId("test")
         .withStartDestination(new GeolocationData())
         .withFinalDestination(new GeolocationData())
         .build();
+
+    //when
     when(tripService.create(any())).thenReturn(trip);
 
+    //then
     mockMvc.perform(post("/trips")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\n" +
@@ -216,11 +225,15 @@ class TripControllerTest {
 
   @Test
   void shouldReturn_404_NotFound_OnTripDeletion_IfTripNotFound() throws Exception {
+    //given
     String id = "test";
+
+    //when
     String notFoundMessage = String.format("Trip with id=%s not found", id);
     NotFoundException notFoundException = new NotFoundException(notFoundMessage);
     doThrow(notFoundException).when(tripService).deleteById(id);
 
+    //then
     mockMvc.perform(delete("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNotFound())
@@ -229,19 +242,34 @@ class TripControllerTest {
 
   @Test
   void shouldReturn_204_NoContent_OnSuccessfulTripDeletion() throws Exception {
+    //given
     String id = "test";
+
+    //then
     mockMvc.perform(delete("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNoContent());
   }
 
-  private GeolocationData buildGeolocationData(double longitude, double latitude, String country,
-      String locality) {
+  private GeolocationData buildGeolocationData(double longitude, double latitude, String country, String locality) {
     GeolocationData geolocationData = new GeolocationData();
     geolocationData.setLongitude(longitude);
     geolocationData.setLatitude(latitude);
     geolocationData.setCountry(country);
     geolocationData.setLocality(locality);
     return geolocationData;
+  }
+
+  private List<Trip> buildTrips() {
+    List<Trip> trips = new ArrayList<>();
+    for (int i = 1; i <= 5; i++) {
+      Trip trip = Trip.builder()
+        .withId(String.valueOf(i))
+        .withStartDestination(new GeolocationData())
+        .withFinalDestination(new GeolocationData())
+        .build();
+      trips.add(trip);
+    }
+    return trips;
   }
 }
