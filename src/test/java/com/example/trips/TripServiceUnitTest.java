@@ -11,6 +11,7 @@ import com.example.trips.api.repository.TripRepository;
 import com.example.trips.api.service.TripMessagePublisher;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,8 +58,10 @@ class TripServiceUnitTest {
     //given
     final TripCreateDto tripCreateDto = null;
     ValidationException exception;
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto);
     //then
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto));
+    exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("TripCreateDto cannot be null"));
   }
 
@@ -66,8 +69,10 @@ class TripServiceUnitTest {
   void shouldThrowValidationExceptionOnTripCreation_IfStartDestinationIsNull() {
     //given
     final TripCreateDto tripCreateDto1 = TripCreateDto.builder().build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto1);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto1));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Start destination coordinates cannot be null"));
   }
 
@@ -77,8 +82,10 @@ class TripServiceUnitTest {
     final TripCreateDto tripCreateDto2 = TripCreateDto.builder()
       .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto2);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto2));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Final destination coordinates cannot be null"));
   }
 
@@ -89,8 +96,10 @@ class TripServiceUnitTest {
       .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto3);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto3));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Email cannot be null"));
   }
 
@@ -102,8 +111,10 @@ class TripServiceUnitTest {
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withOwnerEmail("")
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto4);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto4));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Invalid email"));
 
     //given
@@ -112,8 +123,10 @@ class TripServiceUnitTest {
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withOwnerEmail("123")
       .build();
+    //when
+    Executable executable2 = () -> tripService.create(tripCreateDto5);
     //then
-    exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto5));
+    exception = assertThrows(ValidationException.class, executable2);
     assertTrue(exception.getMessage().contains("Invalid email"));
   }
 
@@ -125,8 +138,10 @@ class TripServiceUnitTest {
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withOwnerEmail("test@mail.com")
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto6);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto6));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Start time cannot be null"));
   }
 
@@ -139,8 +154,10 @@ class TripServiceUnitTest {
       .withOwnerEmail("test@mail.com")
       .withStartTime(START_TIME)
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto7);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto7));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("End time cannot be null"));
   }
 
@@ -154,8 +171,10 @@ class TripServiceUnitTest {
       .withStartTime(START_TIME)
       .withEndTime(START_TIME.minusDays(10))
       .build();
+    //when
+    Executable executable = () -> tripService.create(tripCreateDto8);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.create(tripCreateDto8));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("End time should not be before start time"));
   }
 
@@ -169,13 +188,13 @@ class TripServiceUnitTest {
       .withStartTime(START_TIME)
       .withEndTime(END_TIME)
       .build();
-
-    //when
     when(tripRepository.save(any(Trip.class))).thenReturn(buildTrip());
     doNothing().when(tripMessagePublisher).publishMessage(any());
 
-    //then
+    //when
     tripService.create(tripCreateDto);
+
+    //then
     verify(tripRepository, times(1)).save(any(Trip.class));
   }
 
@@ -195,8 +214,10 @@ class TripServiceUnitTest {
     //given
     final TripUpdateDto tripUpdateDto1 = TripUpdateDto.builder().build();
     ValidationException exception;
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto1);
     //then
-    exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto1));
+    exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Start destination coordinates cannot be null"));
   }
 
@@ -206,8 +227,10 @@ class TripServiceUnitTest {
     final TripUpdateDto tripUpdateDto2 = TripUpdateDto.builder()
       .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .build();
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto2);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto2));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Final destination coordinates cannot be null"));
   }
 
@@ -218,8 +241,10 @@ class TripServiceUnitTest {
       .withStartDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .build();
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto3);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto3));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Email cannot be null"));
   }
 
@@ -231,8 +256,10 @@ class TripServiceUnitTest {
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withOwnerEmail("")
       .build();
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto4);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto4));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("Invalid email"));
 
     //given
@@ -241,8 +268,10 @@ class TripServiceUnitTest {
       .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
       .withOwnerEmail("123")
       .build();
+    //when
+    Executable executable2 = () -> tripService.update(TRIP_ID, tripUpdateDto5);
     //then
-    exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto5));
+    exception = assertThrows(ValidationException.class, executable2);
     assertTrue(exception.getMessage().contains("Invalid email"));
   }
 
@@ -254,8 +283,10 @@ class TripServiceUnitTest {
         .withFinalDestinationCoordinates(new GeolocationCoordinates(LATITUDE, LONGITUDE))
         .withOwnerEmail("test@mail.com")
         .build();
+      //when
+      Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto6);
       //then
-      ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto6));
+      ValidationException exception = assertThrows(ValidationException.class, executable);
       assertTrue(exception.getMessage().contains("Start time cannot be null"));
     }
 
@@ -268,8 +299,10 @@ class TripServiceUnitTest {
       .withOwnerEmail("test@mail.com")
       .withStartTime(START_TIME)
       .build();
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto7);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto7));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("End time cannot be null"));
   }
 
@@ -283,8 +316,10 @@ class TripServiceUnitTest {
       .withStartTime(START_TIME)
       .withEndTime(START_TIME.minusDays(10))
       .build();
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto8);
     //then
-    ValidationException exception = assertThrows(ValidationException.class, () -> tripService.update(TRIP_ID, tripUpdateDto8));
+    ValidationException exception = assertThrows(ValidationException.class, executable);
     assertTrue(exception.getMessage().contains("End time should not be before start time"));
   }
 
@@ -298,12 +333,13 @@ class TripServiceUnitTest {
       .withStartTime(START_TIME)
       .withEndTime(END_TIME)
       .build();
-
-    //when
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.empty());
 
+    //when
+    Executable executable = () -> tripService.update(TRIP_ID, tripUpdateDto);
+
     //then
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> tripService.update(TRIP_ID, tripUpdateDto));
+    NotFoundException exception = assertThrows(NotFoundException.class, executable);
     assertTrue(exception.getMessage().contains(String.format("Trip with id=%s not found", TRIP_ID)));
   }
 
@@ -326,14 +362,14 @@ class TripServiceUnitTest {
       .withStartTime(updatedStartTime)
       .withEndTime(updatedEndTime)
       .build();
-
-    //when
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.of(trip));
     doNothing().when(tripMessagePublisher).publishMessage(any());
     when(tripRepository.save(any(Trip.class))).thenReturn(updatedTrip);
 
-    //then
+    //when
     tripService.update(TRIP_ID, tripUpdateDto);
+
+    //then
     verify(tripRepository, times(1)).save(any(Trip.class));
   }
 
@@ -341,12 +377,13 @@ class TripServiceUnitTest {
   void shouldThrowNotFoundExceptionOnTripDeletion_IfNotFound() {
     //given
     String tripId = TRIP_ID;
-
-    //when
     when(tripRepository.findById(tripId)).thenReturn(Optional.empty());
 
+    //when
+    Executable executable = () -> tripService.deleteById(tripId);
+
     //then
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> tripService.deleteById(tripId));
+    NotFoundException exception = assertThrows(NotFoundException.class, executable);
     assertTrue(exception.getMessage().contains(String.format("Trip with id=%s not found", tripId)));
     verify(tripRepository, times(0)).save(any(Trip.class));
   }
@@ -355,10 +392,10 @@ class TripServiceUnitTest {
   void shouldDeleteTripById_IfFound() {
     //given
     Trip trip = Trip.builder().withId(TRIP_ID).build();
-    //when
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.of(trip));
-    //then
+    //when
     tripService.deleteById(TRIP_ID);
+    //then
     verify(tripRepository, times(1)).deleteById(TRIP_ID);
   }
 
@@ -366,12 +403,13 @@ class TripServiceUnitTest {
   void shouldThrowNotFoundException_IfTripNotFoundById() {
     //given
     String tripId = TRIP_ID;
-
-    //when
     when(tripRepository.findById(tripId)).thenReturn(Optional.empty());
 
+    //when
+    Executable executable = () -> tripService.findById(tripId);
+
     //then
-    NotFoundException exception = assertThrows(NotFoundException.class, () -> tripService.findById(tripId));
+    NotFoundException exception = assertThrows(NotFoundException.class, executable);
     assertTrue(exception.getMessage().contains(String.format("Trip with id=%s not found", tripId)));
   }
 
@@ -379,12 +417,12 @@ class TripServiceUnitTest {
   void shouldFindTripById() {
     //given
     Trip trip = Trip.builder().withId(TRIP_ID).build();
-
-    //when
     when(tripRepository.findById(TRIP_ID)).thenReturn(Optional.of(trip));
 
-    //then
+    //when
     Trip foundTrip = tripService.findById(TRIP_ID);
+
+    //then
     assertEquals(TRIP_ID, foundTrip.getId());
   }
 
@@ -392,10 +430,10 @@ class TripServiceUnitTest {
   void shouldReturnEmptyCollection_IfTripNotFoundByEmail() {
     //given
     String email = "test@mail.com";
-    //when
     when(tripRepository.findAllByEmail(email)).thenReturn(Collections.emptyList());
-    //then
+    //when
     List<Trip> tripsByEmail = tripService.findAllByEmail(email);
+    //then
     assertTrue(tripsByEmail.isEmpty());
   }
 
@@ -404,12 +442,12 @@ class TripServiceUnitTest {
     //given
     String email = "test@mail.com";
     List<Trip> trips = buildTrips();
-
-    //when
     when(tripRepository.findAllByEmail(email)).thenReturn(trips);
 
-    //then
+    //when
     List<Trip> foundTrips = tripService.findAllByEmail(email);
+
+    //then
     assertEquals(trips, foundTrips);
   }
 

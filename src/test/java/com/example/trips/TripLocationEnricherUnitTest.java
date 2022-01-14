@@ -43,15 +43,15 @@ class TripLocationEnricherUnitTest {
   void shouldSuccessfullyEnrichTripGeolocationData() {
     //given
     Trip trip = buildTrip();
-
-    //when
     GeolocationInfo startGeolocationInfo = buildGeolocationInfo(START_LOCATION_COUNTRY, START_LOCATION_LOCALITY);
     when(geolocationInfoRetriever.retrieve(new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE))).thenReturn(startGeolocationInfo);
     GeolocationInfo finalGeolocationInfo = buildGeolocationInfo(FINAL_LOCATION_COUNTRY, FINAL_LOCATION_LOCALITY);
     when(geolocationInfoRetriever.retrieve(new GeolocationCoordinates(FINAL_LOCATION_LATITUDE, FINAL_LOCATION_LONGITUDE))).thenReturn(finalGeolocationInfo);
 
-    //then
+    //when
     var enrichedTrip = tripLocationEnricher.enrich(trip);
+
+    //then
     assertEquals(START_LOCATION_COUNTRY, enrichedTrip.getStartDestination().getCountry());
     assertEquals(START_LOCATION_LOCALITY, enrichedTrip.getStartDestination().getLocality());
     assertEquals(FINAL_LOCATION_COUNTRY, enrichedTrip.getFinalDestination().getCountry());

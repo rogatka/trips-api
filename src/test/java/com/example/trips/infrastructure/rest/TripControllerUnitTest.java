@@ -80,7 +80,7 @@ class TripControllerUnitTest {
     //given
     String id = "test";
 
-    //then
+    //when/then
     mockMvc.perform(get("/trips/{id}", id)
         .header("Authorization", "Bearer " + "invalid token"))
         .andExpect(status().isForbidden())
@@ -91,13 +91,11 @@ class TripControllerUnitTest {
   void shouldReturn_404_NotFound_IfTripNotFoundById() throws Exception {
     //given
     String id = "test";
-
-    //when
     String notFoundMessage = String.format("Trip with id=%s not found", id);
     NotFoundException notFoundException = new NotFoundException(notFoundMessage);
     when(tripService.findById(id)).thenThrow(notFoundException);
 
-    //then
+    //when/then
     mockMvc.perform(get("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNotFound())
@@ -117,11 +115,9 @@ class TripControllerUnitTest {
         .withStartTime(START_TIME)
         .withEndTime(END_TIME)
         .build();
-
-    //when
     when(tripService.findById(id)).thenReturn(trip);
 
-    //then
+    //when/then
     mockMvc.perform(get("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isOk())
@@ -144,11 +140,9 @@ class TripControllerUnitTest {
   void shouldReturnEmptyCollectionInResponse_200_OK_IfTripsNotFoundByEmail() throws Exception {
     //given
     String email = "test@mail.com";
-
-    //when
     when(tripService.findAllByEmail(email)).thenReturn(Collections.emptyList());
 
-    //then
+    //when/then
     mockMvc.perform(get("/trips")
             .queryParam("email", email)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
@@ -161,11 +155,9 @@ class TripControllerUnitTest {
     //given
     String email = "test@mail.com";
     List<Trip> trips = buildTrips();
-
-    //when
     when(tripService.findAllByEmail(email)).thenReturn(trips);
 
-    //then
+    //when/then
     mockMvc.perform(get("/trips")
             .queryParam("email", email)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
@@ -178,11 +170,9 @@ class TripControllerUnitTest {
   void shouldReturn400_BadRequest_IfValidationFailedOnTripCreation() throws Exception {
     //given
     TripCreateDto tripCreateDto = TripCreateDto.builder().build();
-
-    //when
     when(tripService.create(tripCreateDto)).thenThrow(ValidationException.class);
 
-    //then
+    //when/then
     mockMvc.perform(post("/trips")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{}")
@@ -198,11 +188,9 @@ class TripControllerUnitTest {
         .withStartDestination(new GeolocationData())
         .withFinalDestination(new GeolocationData())
         .build();
-
-    //when
     when(tripService.create(any())).thenReturn(trip);
 
-    //then
+    //when/then
     mockMvc.perform(post("/trips")
             .contentType(MediaType.APPLICATION_JSON_VALUE)
             .content("{\n" +
@@ -227,13 +215,11 @@ class TripControllerUnitTest {
   void shouldReturn_404_NotFound_OnTripDeletion_IfTripNotFound() throws Exception {
     //given
     String id = "test";
-
-    //when
     String notFoundMessage = String.format("Trip with id=%s not found", id);
     NotFoundException notFoundException = new NotFoundException(notFoundMessage);
     doThrow(notFoundException).when(tripService).deleteById(id);
 
-    //then
+    //when/then
     mockMvc.perform(delete("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNotFound())
@@ -245,7 +231,7 @@ class TripControllerUnitTest {
     //given
     String id = "test";
 
-    //then
+    //when/then
     mockMvc.perform(delete("/trips/{id}", id)
             .header("Authorization", "Bearer " + authenticationProperties.getSecret()))
         .andExpect(status().isNoContent());

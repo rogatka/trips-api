@@ -13,6 +13,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -44,10 +45,11 @@ class GeolocationInfoFeignRetrieverUnitTest {
     //given
     List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
     GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    //when
     when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY, startLocationQuery)).thenThrow(FeignException.class);
+    //when
+    Executable executable = () -> geolocationInfoRetriever.retrieve(geolocationCoordinates);
     //then
-    InternalServerErrorException exception = assertThrows(InternalServerErrorException.class, () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
+    InternalServerErrorException exception = assertThrows(InternalServerErrorException.class, executable);
     assertTrue(exception.getMessage().contains("Exception when trying to get geolocation data"));
   }
 
@@ -56,9 +58,10 @@ class GeolocationInfoFeignRetrieverUnitTest {
     //given
     List<Double> startLocationQuery = List.of(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
     GeolocationCoordinates geolocationCoordinates = new GeolocationCoordinates(START_LOCATION_LATITUDE, START_LOCATION_LONGITUDE);
-    //when
     when(geolocationFeignClient.getLocation(GEOLOCATION_RESULTS_LIMIT, GEOLOCATION_API_KEY, startLocationQuery)).thenReturn(ResponseEntity.ok().build());
+    //when
+    Executable executable = () -> geolocationInfoRetriever.retrieve(geolocationCoordinates);
     //then
-    assertThrows(NullPointerException.class, () -> geolocationInfoRetriever.retrieve(geolocationCoordinates));
+    assertThrows(NullPointerException.class, executable);
   }
 }

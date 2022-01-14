@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,12 +60,12 @@ class RabbitConsumerUnitTest {
   void shouldNotEnrichGeolocationData_IfTripNotFoundById() {
     //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
-
-    //when
     when(tripService.findById(TRIP_ID)).thenThrow(NotFoundException.class);
 
-    //then
+    //when
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
+
+    //then
     verifyNoInteractions(tripEnricher);
   }
 
@@ -73,13 +74,13 @@ class RabbitConsumerUnitTest {
     //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     Trip trip = Trip.builder().withId(TRIP_ID).build();
-
-    //when
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
     when(tripEnricher.enrich(trip)).thenThrow(FeignException.class);
 
-    //then
+    //when
     rabbitConsumer.enrichTripAndSave(tripMessageDto);
+
+    //then
     verify(tripRepository, times(0)).save(any(Trip.class));
   }
 
@@ -88,14 +89,15 @@ class RabbitConsumerUnitTest {
     //given
     TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
     Trip trip = buildTrip();
-
-    //when
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
     var enrichedTrip = enrichGeolocationDataAndGet(trip);
     when(tripEnricher.enrich(trip)).thenReturn(enrichedTrip);
 
+    //when
+    Executable executable = () -> rabbitConsumer.enrichTripAndSave(tripMessageDto);
+
     //then
-    Assertions.assertDoesNotThrow(() -> rabbitConsumer.enrichTripAndSave(tripMessageDto));
+    Assertions.assertDoesNotThrow(executable);
   }
 
   private Trip enrichGeolocationDataAndGet(Trip trip) {
