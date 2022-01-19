@@ -1,5 +1,6 @@
 package com.example.trips.infrastructure.feign;
 
+import com.example.trips.api.exception.GeolocationEnrichmentException;
 import com.example.trips.api.exception.InternalServerErrorException;
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.model.GeolocationCoordinates;
@@ -39,8 +40,7 @@ class GeolocationInfoFeignRetriever implements GeolocationInfoRetriever {
       geolocationInfoFeignResponse = geolocationFeignClient.getLocation(RESULTS_LIMIT, geolocationProperties.getApiKey(), startLocationQuery);
     } catch (FeignException e) {
       log.error("Exception when trying to get geolocation data for coordinates: {}", geolocationCoordinates);
-      throw new InternalServerErrorException(String.format("Exception when trying to get geolocation data " +
-        "for coordinates: %s", geolocationCoordinates), e);
+      throw new GeolocationEnrichmentException(String.format("Exception when trying to get geolocation data for coordinates: %s", geolocationCoordinates), e);
     }
     GeolocationInfoFeignResponse body = geolocationInfoFeignResponse.getBody();
     Objects.requireNonNull(body, "Body is null");
@@ -48,6 +48,6 @@ class GeolocationInfoFeignRetriever implements GeolocationInfoRetriever {
     if (data.isEmpty()) {
       throw new NotFoundException(String.format("Geolocation info not found for coordinates: %s", geolocationCoordinates));
     }
-    return data.stream().findFirst().get();
+    return data.get(0);
   }
 }

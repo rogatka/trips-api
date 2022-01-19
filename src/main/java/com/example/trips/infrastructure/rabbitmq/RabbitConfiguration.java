@@ -31,9 +31,19 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
   @Bean
   public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
     TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getExchange());
-    Queue enrichmentQueue = QueueBuilder.durable(rabbitProperties.getEnrichmentQueueName()).build();
-    return new Declarables(enrichmentQueue, tripsTopicExchange,
-      BindingBuilder.bind(enrichmentQueue).to(tripsTopicExchange).with(rabbitProperties.getEnrichmentQueueBindingKey()));
+
+    Queue enrichmentQueue = QueueBuilder
+      .durable(rabbitProperties.getEnrichmentQueueName())
+      .withArgument("x-dead-letter-exchange", "")
+      .withArgument("x-dead-letter-routing-key", rabbitProperties.getDeadLetterEnrichmentQueueName())
+      .build();
+    Queue deadLetterQueue = QueueBuilder
+      .durable(rabbitProperties.getDeadLetterEnrichmentQueueName())
+      .build();
+
+    return new Declarables(enrichmentQueue, tripsTopicExchange, deadLetterQueue,
+      BindingBuilder.bind(enrichmentQueue).to(tripsTopicExchange).with(rabbitProperties.getEnrichmentQueueBindingKey())
+    );
   }
 
   @Override

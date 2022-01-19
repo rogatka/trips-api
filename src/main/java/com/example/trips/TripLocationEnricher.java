@@ -1,6 +1,7 @@
 package com.example.trips;
 
 import com.example.trips.api.model.GeolocationCoordinates;
+import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.GeolocationInfo;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.service.GeolocationInfoRetriever;
@@ -18,24 +19,18 @@ class TripLocationEnricher implements TripEnricher {
 
   @Override
   public Trip enrich(Trip trip) {
-    enrichStartDestination(trip);
-    enrichFinalDestination(trip);
-    return trip;
+    return Trip.builderFromExisting(trip)
+      .withStartDestination(getEnrichedGeolocationData(trip.getStartDestination()))
+      .withFinalDestination(getEnrichedGeolocationData(trip.getFinalDestination()))
+      .build();
   }
 
-  private void enrichStartDestination(Trip trip) {
-    double latitude = trip.getStartDestination().getLatitude();
-    double longitude = trip.getStartDestination().getLongitude();
+  private GeolocationData getEnrichedGeolocationData(GeolocationData geolocationData) {
+    double latitude = geolocationData.getLatitude();
+    double longitude = geolocationData.getLongitude();
     GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(new GeolocationCoordinates(latitude, longitude));
-    trip.getStartDestination().setCountry(geolocationInfo.getCountry());
-    trip.getStartDestination().setLocality(geolocationInfo.getLocality());
-  }
-
-  private void enrichFinalDestination(Trip trip) {
-    double latitude = trip.getFinalDestination().getLatitude();
-    double longitude = trip.getFinalDestination().getLongitude();
-    GeolocationInfo geolocationInfo = geolocationInfoRetriever.retrieve(new GeolocationCoordinates(latitude, longitude));
-    trip.getFinalDestination().setCountry(geolocationInfo.getCountry());
-    trip.getFinalDestination().setLocality(geolocationInfo.getLocality());
+    geolocationData.setCountry(geolocationInfo.getCountry());
+    geolocationData.setLocality(geolocationInfo.getLocality());
+    return geolocationData;
   }
 }

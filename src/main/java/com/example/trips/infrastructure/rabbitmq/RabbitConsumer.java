@@ -1,7 +1,8 @@
 package com.example.trips.infrastructure.rabbitmq;
 
+import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.model.Trip;
-import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.api.model.TripDto;
 import com.example.trips.api.repository.TripRepository;
 import com.example.trips.api.service.TripEnricher;
 import com.example.trips.api.service.TripService;
@@ -30,14 +31,14 @@ class RabbitConsumer {
   }
 
   @RabbitListener(queues = {TRIPS_ENRICHMENT_QUEUE})
-  void enrichTripAndSave(TripMessageDto messageDto) {
+  void consume(TripDto tripDto) {
     try {
-      Trip trip = tripService.findById(messageDto.getId());
+      Trip trip = tripService.findById(tripDto.getId());
       Trip enrichedTrip = tripEnricher.enrich(trip);
-      tripService.findById(messageDto.getId());
+      tripService.findById(tripDto.getId());
       tripRepository.save(enrichedTrip);
-    } catch (Exception ex) {
-      log.error("Error while enriching trip with id={}. Message: {}", messageDto.getId(), ex.getMessage());
+    } catch (NotFoundException e) {
+      log.info("Trip with id = {} was already deleted and should not be enriched", tripDto.getId());
     }
   }
 }

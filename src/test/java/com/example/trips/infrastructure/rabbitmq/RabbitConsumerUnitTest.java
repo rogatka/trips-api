@@ -1,27 +1,29 @@
 package com.example.trips.infrastructure.rabbitmq;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
-
 import com.example.trips.api.exception.NotFoundException;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.Trip;
-import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.api.model.TripDto;
 import com.example.trips.api.repository.TripRepository;
 import com.example.trips.api.service.TripEnricher;
 import com.example.trips.api.service.TripService;
 import feign.FeignException;
-import java.time.LocalDateTime;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.ThrowableAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.function.Executable;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class RabbitConsumerUnitTest {
@@ -57,47 +59,56 @@ class RabbitConsumerUnitTest {
   private RabbitConsumer rabbitConsumer;
 
   @Test
-  void shouldNotEnrichGeolocationData_IfTripNotFoundById() {
+  void shouldNotEnrichTrip_IfTripNotFoundById() {
     //given
-    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
+    TripDto tripDto = new TripDto(TRIP_ID);
     when(tripService.findById(TRIP_ID)).thenThrow(NotFoundException.class);
 
     //when
-    rabbitConsumer.enrichTripAndSave(tripMessageDto);
+    rabbitConsumer.consume(tripDto);
 
     //then
     verifyNoInteractions(tripEnricher);
+    verifyNoInteractions(tripRepository);
   }
 
   @Test
-  void shouldNotEnrichTripGeolocationData_IfExceptionWhileInteractingWithTripEnricher() {
+  void shouldNotEnrichTrip_AndRethrowException_IfExceptionOccursInEnricher() {
     //given
-    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
+    TripDto tripDto = new TripDto(TRIP_ID);
     Trip trip = Trip.builder().withId(TRIP_ID).build();
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
     when(tripEnricher.enrich(trip)).thenThrow(FeignException.class);
 
     //when
-    rabbitConsumer.enrichTripAndSave(tripMessageDto);
+    ThrowableAssert.ThrowingCallable executable = () -> rabbitConsumer.consume(tripDto);
 
     //then
-    verify(tripRepository, times(0)).save(any(Trip.class));
+    assertThatThrownBy(executable)
+      .isInstanceOf(FeignException.class);
+
+    verifyNoInteractions(tripRepository);
   }
 
   @Test
-  void shouldSuccessfullyEnrichTripGeolocationData() {
+  void shouldEnrichAndSaveTrip() {
     //given
-    TripMessageDto tripMessageDto = new TripMessageDto(TRIP_ID);
+    TripDto tripDto = new TripDto(TRIP_ID);
     Trip trip = buildTrip();
     when(tripService.findById(TRIP_ID)).thenReturn(trip);
     var enrichedTrip = enrichGeolocationDataAndGet(trip);
     when(tripEnricher.enrich(trip)).thenReturn(enrichedTrip);
+    when(tripRepository.save(enrichedTrip)).thenAnswer(invocation -> invocation.getArgument(0));
+    ArgumentCaptor<Trip> captor = ArgumentCaptor.forClass(Trip.class);
 
     //when
-    Executable executable = () -> rabbitConsumer.enrichTripAndSave(tripMessageDto);
+    ThrowableAssert.ThrowingCallable executable = () -> rabbitConsumer.consume(tripDto);
 
     //then
-    Assertions.assertDoesNotThrow(executable);
+    assertThatNoException().isThrownBy(executable);
+    verify(tripRepository).save(captor.capture());
+    Trip savedTrip = captor.getValue();
+    assertThat(savedTrip).isEqualTo(enrichedTrip);
   }
 
   private Trip enrichGeolocationDataAndGet(Trip trip) {
@@ -110,13 +121,13 @@ class RabbitConsumerUnitTest {
 
   private Trip buildTrip() {
     return Trip.builder()
-        .withId(TRIP_ID)
-        .withStartDestination(buildGeolocationData())
-        .withFinalDestination(buildGeolocationData())
-        .withOwnerEmail("test@mail.com")
-        .withStartTime(START_TIME)
-        .withEndTime(END_TIME)
-        .build();
+      .withId(TRIP_ID)
+      .withStartDestination(buildGeolocationData())
+      .withFinalDestination(buildGeolocationData())
+      .withOwnerEmail("test@mail.com")
+      .withStartTime(START_TIME)
+      .withEndTime(END_TIME)
+      .build();
   }
 
   private GeolocationData buildGeolocationData() {

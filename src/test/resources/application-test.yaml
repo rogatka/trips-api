@@ -11,8 +11,15 @@ spring:
     virtualHost: ${RABBIT_MQ_VIRTUAL_HOST:}
     username: ${RABBIT_MQ_USERNAME:guest}
     password: ${RABBIT_MQ_PASSWORD:guest}
-    template:
-      reply-timeout: ${RABBIT_MQ_REPLY_TIMEOUT:3000}
+    listener:
+      default-requeue-rejected: false
+      simple:
+        retry:
+          enabled: true
+          initial-interval: 3s
+          max-interval: 10s
+          multiplier: 2
+          max-attempts: 3
 
 geolocation-api:
   url: http://localhost:8090
@@ -23,3 +30,4 @@ rabbit:
   exchange: trips
   enrichment-queue-name: enrichment-queue
   enrichment-queue-binding-key: trips.enrichment
+  dead-letter-enrichment-queue-name: dead-letter-enrichment-queue

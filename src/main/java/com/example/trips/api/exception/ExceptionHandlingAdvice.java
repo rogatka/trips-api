@@ -31,6 +31,11 @@ public class ExceptionHandlingAdvice {
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
   }
 
+  @ExceptionHandler(GeolocationEnrichmentException.class)
+  public final ResponseEntity<String> handleGeolocationEnrichmentException(GeolocationEnrichmentException ex) {
+    return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+
   @ExceptionHandler(InternalServerErrorException.class)
   public final ResponseEntity<String> handleInternalServerErrorException(InternalServerErrorException ex) {
     return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);

@@ -1,17 +1,14 @@
 package com.example.trips.infrastructure.rest;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
+import com.example.trips.api.exception.NotFoundException;
+import com.example.trips.api.exception.ValidationException;
 import com.example.trips.api.model.GeolocationCoordinates;
+import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.LocationErrorInfo;
+import com.example.trips.api.model.Trip;
+import com.example.trips.api.model.TripCreateDto;
 import com.example.trips.api.repository.TripRepository;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -24,16 +21,38 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class RestIntegrationTest {
 
-  private static final LocalDateTime START_TIME = LocalDateTime.of(2021, 12, 26, 1, 1, 1, 1);
+  private static final LocalDateTime CREATED_TIME = LocalDateTime.of(2022, 1, 1, 1, 1, 1);
 
-  private static final LocalDateTime END_TIME = LocalDateTime.of(2021, 12, 27, 1, 1, 1, 1);
+  private static final LocalDateTime START_TIME = LocalDateTime.of(2022, 2, 1, 1, 1, 1);
+
+  private static final LocalDateTime END_TIME = LocalDateTime.of(2022, 3, 1, 1, 1, 1);
 
   private static final double MOSCOW_LATITUDE = 55.755793;
 
@@ -53,168 +72,234 @@ class RestIntegrationTest {
   private AuthenticationProperties authenticationProperties;
 
   @Test
-  void shouldCreateNewTrip_AndReturnResponseWithLocationErrors() {
-    //should create new trip
-    HttpEntity<TripCreateRequest> request = buildTripCreateRequestEntity(getAuthorizationHeader());
+  void shouldReturn_403_Forbidden_IfInvalidBearerToken() {
+    //given
+    HttpHeaders invalidAuthorizationHeader = getInvalidAuthorizationHeader();
+    //when
+    ResponseEntity<List<TripResponse>> findAllByEmailResponse = testRestTemplate.exchange(
+      "/trips?email={email}", HttpMethod.GET, new HttpEntity<>(invalidAuthorizationHeader),
+      new ParameterizedTypeReference<List<TripResponse>>() {
+      }, Map.of("email", "test@mail.com"));
+    //then
+    assertThat(findAllByEmailResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.FORBIDDEN));
+  }
+
+  @Test
+  void shouldCreateNewTrip_AndReturn201_CREATED_WithCorrectResponse() {
+    //given
+    TripCreateRequest tripCreateRequest = buildTripCreateRequest();
+    HttpEntity<TripCreateRequest> request = new HttpEntity<>(tripCreateRequest, getAuthorizationHeader());
+    //when
     ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips", request, TripResponse.class);
-    assertEquals(HttpStatus.CREATED, createTripResponse.getStatusCode());
-    assertNotNull(createTripResponse.getBody());
+    //then
+    assertThat(createTripResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.CREATED))
+      .has(createResponseCondition(ResponseEntity::hasBody))
+      .extracting(ResponseEntity::getBody)
+      .hasNoNullFieldsOrProperties()
+      .extracting(TripResponse::getOwnerEmail, TripResponse::getStartTime, TripResponse::getEndTime)
+      .containsExactly(tripCreateRequest.getOwnerEmail(), tripCreateRequest.getStartTime(), tripCreateRequest.getEndTime());
 
     TripResponse tripResponse = createTripResponse.getBody();
-    assertNull(tripResponse.getStartDestination().getCountry());
-    assertNull(tripResponse.getStartDestination().getLocality());
-    assertNull(tripResponse.getFinalDestination().getCountry());
-    assertNull(tripResponse.getFinalDestination().getLocality());
+    assertThat(tripResponse.getStartDestination())
+      .hasNoNullFieldsOrPropertiesExcept("country", "locality")
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude)
+      .containsExactly(tripCreateRequest.getStartDestinationCoordinates().getLatitude(), tripCreateRequest.getStartDestinationCoordinates().getLongitude());
 
-    List<LocationErrorInfo> locationErrors = tripResponse.getLocationErrors();
-    assertEquals(2, locationErrors.size());
-    assertAll(
-        () -> assertTrue(locationErrors.get(0).getMessage().contains("Cannot define location by coordinates")),
-        () -> assertTrue(locationErrors.get(0).getMessage().contains("Cannot define location by coordinates"))
-    );
+    assertThat(tripResponse.getFinalDestination())
+      .hasNoNullFieldsOrPropertiesExcept("country", "locality")
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude)
+      .containsExactly(tripCreateRequest.getFinalDestinationCoordinates().getLatitude(), tripCreateRequest.getFinalDestinationCoordinates().getLongitude());
+
+    assertThat(tripResponse.getLocationErrors())
+      .hasSize(2)
+      .extracting(LocationErrorInfo::getCause, LocationErrorInfo::getMessage)
+      .contains(
+        tuple("Invalid start location coordinates", "Cannot define location by coordinates. Please update start location coordinates"),
+        tuple("Invalid final location coordinates", "Cannot define location by coordinates. Please update final location coordinates")
+      );
   }
 
   @Test
-  void shouldCreateNewTrip_AndThenFindIt_ByEmail() {
-    HttpHeaders headers = getAuthorizationHeader();
-    //should find no trips by email
+  void shouldNotCreateNewTrip_AndReturn400_BAD_REQUEST_IfValidationFailed() {
+    //given
+    TripCreateRequest tripCreateRequest = TripCreateRequest.builder().build();
+    HttpEntity<TripCreateRequest> request = new HttpEntity<>(tripCreateRequest, getAuthorizationHeader());
+    //when
+    ResponseEntity<String> createTripResponse = testRestTemplate.postForEntity("/trips", request, String.class);
+    //then
+    assertThat(createTripResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.BAD_REQUEST));
+  }
+
+  @Test
+  void shouldFindNoTripsByEmail_AndReturn200_OK_WithEmptyBody() {
+    //when
     ResponseEntity<List<TripResponse>> findAllByEmailResponse = testRestTemplate.exchange(
-        "/trips?email={email}", HttpMethod.GET, new HttpEntity<>(headers),
-        new ParameterizedTypeReference<List<TripResponse>>() {
-        }, Map.of("email", "test@mail.com"));
-
-    assertEquals(HttpStatus.OK, findAllByEmailResponse.getStatusCode());
-    assertNotNull(findAllByEmailResponse.getBody());
-    assertTrue(findAllByEmailResponse.getBody().isEmpty());
-
-    //should create new trip
-    HttpEntity<TripCreateRequest> request = buildTripCreateRequestEntity(headers);
-    ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips", request, TripResponse.class);
-    assertEquals(HttpStatus.CREATED, createTripResponse.getStatusCode());
-    assertNotNull(createTripResponse.getBody());
-
-    TripResponse createdTrip = createTripResponse.getBody();
-    assertNull(createdTrip.getStartDestination().getCountry());
-    assertNull(createdTrip.getStartDestination().getLocality());
-    assertNull(createdTrip.getFinalDestination().getCountry());
-    assertNull(createdTrip.getFinalDestination().getLocality());
-
-    //should find trip by email
-    ResponseEntity<List<TripResponse>> findAllByEmailAfterTripCreationResponse = testRestTemplate.exchange(
-        "/trips?email={email}",
-        HttpMethod.GET, new HttpEntity<>(headers),
-        new ParameterizedTypeReference<List<TripResponse>>() {
-        }, Map.of("email", "test@mail.com"));
-
-    assertEquals(HttpStatus.OK, findAllByEmailAfterTripCreationResponse.getStatusCode());
-    assertNotNull(findAllByEmailAfterTripCreationResponse.getBody());
-    assertEquals(1, findAllByEmailAfterTripCreationResponse.getBody().size());
-
-    TripResponse foundTrip = findAllByEmailAfterTripCreationResponse.getBody().get(0);
-    assertEquals(createdTrip.getId(), foundTrip.getId());
+      "/trips?email={email}", HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
+      new ParameterizedTypeReference<List<TripResponse>>() {
+      }, Map.of("email", "test@mail.com"));
+    //then
+    assertThat(findAllByEmailResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.OK))
+      .has(createResponseCondition(ResponseEntity::hasBody))
+      .extracting(ResponseEntity::getBody)
+      .asList()
+      .isEmpty();
   }
 
   @Test
-  void shouldCreateNewTrip_AndThenFindIt_ById() {
-    HttpHeaders headers = getAuthorizationHeader();
+  void shouldFindTripByEmail_AndReturn200_OK() {
+    //given
+    Trip trip = tripRepository.save(buildTrip(getMoscowLocationData(), getWashingtonLocationData()));
 
-    //should create new trip
-    HttpEntity<TripCreateRequest> request = buildTripCreateRequestEntity(headers);
-    ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips", request, TripResponse.class);
-    assertEquals(HttpStatus.CREATED, createTripResponse.getStatusCode());
-    assertNotNull(createTripResponse.getBody());
+    //when
+    ResponseEntity<List<TripResponse>> findTripsByEmailResponse = testRestTemplate.exchange(
+      "/trips?email={email}",
+      HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
+      new ParameterizedTypeReference<List<TripResponse>>() {
+      }, Map.of("email", "test@mail.com"));
 
-    TripResponse createdTrip = createTripResponse.getBody();
-    assertNull(createdTrip.getStartDestination().getCountry());
-    assertNull(createdTrip.getStartDestination().getLocality());
-    assertNull(createdTrip.getFinalDestination().getCountry());
-    assertNull(createdTrip.getFinalDestination().getLocality());
+    //then
+    assertThat(findTripsByEmailResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.OK))
+      .has(createResponseCondition(ResponseEntity::hasBody))
+      .extracting(ResponseEntity::getBody)
+      .asList()
+      .hasSize(1);
 
-    //should find trip by id
-    ResponseEntity<TripResponse> findByIdAfterTripCreationResponse = testRestTemplate.exchange(
-        "/trips/{id}",
-        HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
-        TripResponse.class, Map.of("id", createdTrip.getId()));
+    TripResponse tripResponse = findTripsByEmailResponse.getBody().get(0);
+    assertThat(tripResponse)
+      .hasNoNullFieldsOrPropertiesExcept("locationErrors")
+      .extracting(TripResponse::getId, TripResponse::getOwnerEmail, TripResponse::getStartTime, TripResponse::getEndTime, TripResponse::getDateCreated)
+      .containsExactly(trip.getId(), trip.getOwnerEmail(), trip.getStartTime(), trip.getEndTime(), trip.getDateCreated());
 
-    assertEquals(HttpStatus.OK, findByIdAfterTripCreationResponse.getStatusCode());
-    assertNotNull(findByIdAfterTripCreationResponse.getBody());
+    assertThat(tripResponse.getStartDestination())
+      .hasNoNullFieldsOrProperties()
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude, GeolocationData::getCountry, GeolocationData::getLocality)
+      .containsExactly(trip.getStartDestination().getLatitude(), trip.getStartDestination().getLongitude(), "Russia", "Moscow");
 
-    TripResponse foundTrip = findByIdAfterTripCreationResponse.getBody();
-    assertEquals(createdTrip.getId(), foundTrip.getId());
+    assertThat(tripResponse.getFinalDestination())
+      .hasNoNullFieldsOrProperties()
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude, GeolocationData::getCountry, GeolocationData::getLocality)
+      .containsExactly(trip.getFinalDestination().getLatitude(), trip.getFinalDestination().getLongitude(), "United States", "Washington");
   }
 
   @Test
-  void shouldCreateNewTrip_AndThenDeleteIt_ById() {
-    //should create new trip
-    HttpEntity<TripCreateRequest> request = buildTripCreateRequestEntity(getAuthorizationHeader());
-    ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips",
-        request, TripResponse.class);
-    assertEquals(HttpStatus.CREATED, createTripResponse.getStatusCode());
-    assertNotNull(createTripResponse.getBody());
+  void shouldFindTripById_AndReturn200_OK() {
+    //given
+    Trip trip = tripRepository.save(buildTrip(getMoscowLocationData(), getWashingtonLocationData()));
 
-    TripResponse createdTrip = createTripResponse.getBody();
-    assertNull(createdTrip.getStartDestination().getCountry());
-    assertNull(createdTrip.getStartDestination().getLocality());
-    assertNull(createdTrip.getFinalDestination().getCountry());
-    assertNull(createdTrip.getFinalDestination().getLocality());
+    //when
+    ResponseEntity<TripResponse> findTripByIdResponse = testRestTemplate.exchange(
+      "/trips/{id}",
+      HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
+      TripResponse.class, Map.of("id", trip.getId()));
 
-    //should find trip by id
-    ResponseEntity<TripResponse> findByIdAfterTripCreationResponse = testRestTemplate.exchange(
-        "/trips/{id}",
-        HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
-        TripResponse.class, Map.of("id", createdTrip.getId()));
-    assertEquals(HttpStatus.OK, findByIdAfterTripCreationResponse.getStatusCode());
-    assertNotNull(findByIdAfterTripCreationResponse.getBody());
+    //then
+    assertThat(findTripByIdResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.OK))
+      .has(createResponseCondition(ResponseEntity::hasBody))
+      .extracting(ResponseEntity::getBody)
+      .hasNoNullFieldsOrPropertiesExcept("locationErrors")
+      .extracting(TripResponse::getId, TripResponse::getOwnerEmail, TripResponse::getStartTime, TripResponse::getEndTime, TripResponse::getDateCreated)
+      .containsExactly(trip.getId(), trip.getOwnerEmail(), trip.getStartTime(), trip.getEndTime(), trip.getDateCreated());
 
-    TripResponse foundTrip = findByIdAfterTripCreationResponse.getBody();
-    assertEquals(createdTrip.getId(), foundTrip.getId());
+    TripResponse tripResponse = findTripByIdResponse.getBody();
+    assertThat(tripResponse.getStartDestination())
+      .hasNoNullFieldsOrProperties()
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude, GeolocationData::getCountry, GeolocationData::getLocality)
+      .containsExactly(trip.getStartDestination().getLatitude(), trip.getStartDestination().getLongitude(), "Russia", "Moscow");
 
-    //should delete trip by id
+    assertThat(tripResponse.getFinalDestination())
+      .hasNoNullFieldsOrProperties()
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude, GeolocationData::getCountry, GeolocationData::getLocality)
+      .containsExactly(trip.getFinalDestination().getLatitude(), trip.getFinalDestination().getLongitude(), "United States", "Washington");
+  }
+
+  @Test
+  void shouldReturn_404_NOT_FOUND_IfTripNotFoundById() {
+    //when
+    ResponseEntity<String> tripNotFoundByIdResponse = testRestTemplate.exchange(
+      "/trips/{id}",
+      HttpMethod.GET, new HttpEntity<>(getAuthorizationHeader()),
+      String.class, Map.of("id", "non-existing-id"));
+
+    //then
+    assertThat(tripNotFoundByIdResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.NOT_FOUND));
+  }
+
+  @Test
+  void shouldDeleteTripByById_AndReturn204_NO_CONTENT() {
+    //given
+    Trip trip = tripRepository.save(buildTrip(getMoscowLocationData(), getWashingtonLocationData()));
+
+    //when
     ResponseEntity<Void> deleteTripByIdResponse = testRestTemplate.exchange(
-        "/trips/{id}",
-        HttpMethod.DELETE, new HttpEntity<>(getAuthorizationHeader()),
-        Void.class, Map.of("id", createdTrip.getId()));
-    assertEquals(HttpStatus.NO_CONTENT, deleteTripByIdResponse.getStatusCode());
+      "/trips/{id}",
+      HttpMethod.DELETE, new HttpEntity<>(getAuthorizationHeader()),
+      Void.class, Map.of("id", trip.getId()));
 
-    //should not find trip by id
-    assertTrue(tripRepository.findAll().isEmpty());
+    //then
+    assertThat(deleteTripByIdResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.NO_CONTENT));
+
+    assertThat(tripRepository.findAll()).isEmpty();
   }
 
   @Test
-  void shouldCreateNewTrip_AndThenUpdateIt() {
-    //should create new trip
-    HttpEntity<TripCreateRequest> request = buildTripCreateRequestEntity(getAuthorizationHeader());
-    ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips",
-        request, TripResponse.class);
-    assertEquals(HttpStatus.CREATED, createTripResponse.getStatusCode());
-    assertNotNull(createTripResponse.getBody());
-    TripResponse createdTrip = createTripResponse.getBody();
+  void shouldNotDeleteAnyTrip_AndReturn404_NOT_FOUND_IfTripNotFound() {
+    //when
+    ResponseEntity<Void> deleteTripByIdResponse = testRestTemplate.exchange(
+      "/trips/{id}",
+      HttpMethod.DELETE, new HttpEntity<>(getAuthorizationHeader()),
+      Void.class, Map.of("id", "non-existing-id"));
 
-    assertNull(createdTrip.getStartDestination().getCountry());
-    assertNull(createdTrip.getStartDestination().getLocality());
-    assertNull(createdTrip.getFinalDestination().getCountry());
-    assertNull(createdTrip.getFinalDestination().getLocality());
+    //then
+    assertThat(deleteTripByIdResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.NOT_FOUND));
+  }
 
-    //should update trip
-    TripUpdateRequest tripUpdateRequest = buildTripUpdateRequest(getAuthorizationHeader());
+  @Test
+  void shouldUpdateTrip_AndReturn200_OK() {
+    //given
+    Trip trip = tripRepository.save(buildTrip(getMoscowLocationData(), getWashingtonLocationData()));
+    TripUpdateRequest tripUpdateRequest = buildTripUpdateRequest();
     HttpEntity<TripUpdateRequest> tripUpdateRequestEntity = new HttpEntity<>(tripUpdateRequest, getAuthorizationHeader());
-    ResponseEntity<TripResponse> updateTripResponse = testRestTemplate.exchange("/trips/{id}",
-        HttpMethod.PUT, tripUpdateRequestEntity, TripResponse.class, Map.of("id", createdTrip.getId()));
-    assertEquals(HttpStatus.OK, updateTripResponse.getStatusCode());
-    assertNotNull(updateTripResponse.getBody());
 
-    TripResponse updatedTrip = updateTripResponse.getBody();
-    assertEquals(tripUpdateRequest.getStartDestinationCoordinates().getLatitude(), updatedTrip.getStartDestination().getLatitude());
-    assertEquals(tripUpdateRequest.getStartDestinationCoordinates().getLongitude(), updatedTrip.getStartDestination().getLongitude());
-    assertNull(updatedTrip.getStartDestination().getCountry());
-    assertNull(updatedTrip.getStartDestination().getLocality());
-    assertEquals(tripUpdateRequest.getFinalDestinationCoordinates().getLatitude(), updatedTrip.getFinalDestination().getLatitude());
-    assertEquals(tripUpdateRequest.getFinalDestinationCoordinates().getLongitude(), updatedTrip.getFinalDestination().getLongitude());
-    assertNull(updatedTrip.getFinalDestination().getCountry());
-    assertNull(updatedTrip.getFinalDestination().getLocality());
-    assertEquals(tripUpdateRequest.getStartTime(), updatedTrip.getStartTime());
-    assertEquals(tripUpdateRequest.getEndTime(), updatedTrip.getEndTime());
-    assertEquals(tripUpdateRequest.getOwnerEmail(), updatedTrip.getOwnerEmail());
+    //when
+    ResponseEntity<TripResponse> updateTripResponse = testRestTemplate.exchange("/trips/{id}",
+      HttpMethod.PUT, tripUpdateRequestEntity, TripResponse.class, Map.of("id", trip.getId()));
+
+    //then
+    assertThat(updateTripResponse)
+      .has(createResponseCondition(response -> response.getStatusCode() == HttpStatus.OK))
+      .has(createResponseCondition(ResponseEntity::hasBody))
+      .extracting(ResponseEntity::getBody)
+      .hasNoNullFieldsOrProperties()
+      .extracting(TripResponse::getOwnerEmail, TripResponse::getStartTime, TripResponse::getEndTime)
+      .containsExactly(tripUpdateRequest.getOwnerEmail(), tripUpdateRequest.getStartTime(), tripUpdateRequest.getEndTime());
+
+    TripResponse tripResponse = updateTripResponse.getBody();
+    assertThat(tripResponse.getStartDestination())
+      .hasNoNullFieldsOrPropertiesExcept("country", "locality")
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude)
+      .containsExactly(tripUpdateRequest.getStartDestinationCoordinates().getLatitude(), tripUpdateRequest.getStartDestinationCoordinates().getLongitude());
+
+    assertThat(tripResponse.getFinalDestination())
+      .hasNoNullFieldsOrPropertiesExcept("country", "locality")
+      .extracting(GeolocationData::getLatitude, GeolocationData::getLongitude)
+      .containsExactly(tripUpdateRequest.getFinalDestinationCoordinates().getLatitude(), tripUpdateRequest.getFinalDestinationCoordinates().getLongitude());
+
+    assertThat(tripResponse.getLocationErrors())
+      .hasSize(2)
+      .extracting(LocationErrorInfo::getCause, LocationErrorInfo::getMessage)
+      .contains(
+        tuple("Invalid start location coordinates", "Cannot define location by coordinates. Please update start location coordinates"),
+        tuple("Invalid final location coordinates", "Cannot define location by coordinates. Please update final location coordinates")
+      );
   }
 
   @AfterEach
@@ -229,23 +314,61 @@ class RestIntegrationTest {
     return headers;
   }
 
-  private HttpEntity<TripCreateRequest> buildTripCreateRequestEntity(HttpHeaders headers) {
-    TripCreateRequest tripCreateRequest = new TripCreateRequest();
-    tripCreateRequest.setStartDestinationCoordinates(new GeolocationCoordinates(MOSCOW_LATITUDE, MOSCOW_LONGITUDE));
-    tripCreateRequest.setFinalDestinationCoordinates(new GeolocationCoordinates(WASHINGTON_LATITUDE, WASHINGTON_LONGITUDE));
-    tripCreateRequest.setStartTime(START_TIME);
-    tripCreateRequest.setEndTime(END_TIME);
-    tripCreateRequest.setOwnerEmail("test@mail.com");
-    return new HttpEntity<>(tripCreateRequest, headers);
+  private HttpHeaders getInvalidAuthorizationHeader() {
+    HttpHeaders headers = new HttpHeaders();
+    headers.set("Authorization", "Bearer " + "invalid-token");
+    return headers;
   }
 
-  private TripUpdateRequest buildTripUpdateRequest(HttpHeaders headers) {
-    TripUpdateRequest tripUpdateRequest = new TripUpdateRequest();
-    tripUpdateRequest.setStartDestinationCoordinates(new GeolocationCoordinates(WASHINGTON_LATITUDE, WASHINGTON_LONGITUDE));
-    tripUpdateRequest.setFinalDestinationCoordinates(new GeolocationCoordinates(MOSCOW_LATITUDE, MOSCOW_LONGITUDE));
-    tripUpdateRequest.setStartTime(START_TIME.plusMonths(1));
-    tripUpdateRequest.setEndTime(END_TIME.plusMonths(1));
-    tripUpdateRequest.setOwnerEmail("test-updated@mail.com");
-    return tripUpdateRequest;
+  private Trip buildTrip(GeolocationData startLocationData, GeolocationData finalLocationData) {
+    return Trip.builder()
+      .withStartDestination(startLocationData)
+      .withFinalDestination(finalLocationData)
+      .withOwnerEmail("test@mail.com")
+      .withStartTime(START_TIME)
+      .withEndTime(END_TIME)
+      .withDateCreated(CREATED_TIME)
+      .build();
+  }
+
+  private GeolocationData getMoscowLocationData() {
+    return buildGeolocationData(MOSCOW_LATITUDE, MOSCOW_LONGITUDE, "Russia", "Moscow");
+  }
+
+  private GeolocationData getWashingtonLocationData() {
+    return buildGeolocationData(WASHINGTON_LATITUDE, WASHINGTON_LONGITUDE, "United States", "Washington");
+  }
+
+  private GeolocationData buildGeolocationData(double latitude, double longitude, String country, String locality) {
+    GeolocationData geolocationData = new GeolocationData();
+    geolocationData.setLatitude(latitude);
+    geolocationData.setLongitude(longitude);
+    geolocationData.setCountry(country);
+    geolocationData.setLocality(locality);
+    return geolocationData;
+  }
+
+  private TripCreateRequest buildTripCreateRequest() {
+    return TripCreateRequest.builder()
+      .withStartDestinationCoordinates(new GeolocationCoordinates(MOSCOW_LATITUDE, MOSCOW_LONGITUDE))
+      .withFinalDestinationCoordinates(new GeolocationCoordinates(WASHINGTON_LATITUDE, WASHINGTON_LONGITUDE))
+      .withStartTime(START_TIME)
+      .withEndTime(END_TIME)
+      .withOwnerEmail("test@mail.com")
+      .build();
+  }
+
+  private TripUpdateRequest buildTripUpdateRequest() {
+    return TripUpdateRequest.builder()
+      .withStartDestinationCoordinates(new GeolocationCoordinates(WASHINGTON_LATITUDE, WASHINGTON_LONGITUDE))
+      .withFinalDestinationCoordinates(new GeolocationCoordinates(MOSCOW_LATITUDE, MOSCOW_LONGITUDE))
+      .withStartTime(START_TIME.plusMonths(1))
+      .withEndTime(END_TIME.plusMonths(1))
+      .withOwnerEmail("test-updated@mail.com")
+      .build();
+  }
+
+  private <T> Condition<T> createResponseCondition(Predicate<T> predicate) {
+    return new Condition<>(predicate, null);
   }
 }

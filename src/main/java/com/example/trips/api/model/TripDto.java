@@ -1,15 +1,17 @@
 package com.example.trips.api.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Objects;
 
-public class TripMessageDto {
+public class TripDto {
 
-  private String id;
+  private final String id;
 
-  public TripMessageDto() {
-  }
-
-  public TripMessageDto(String id) {
+  @JsonCreator(mode = JsonCreator.Mode.PROPERTIES)
+  public TripDto(@JsonProperty("id") String id) {
     this.id = id;
   }
 
@@ -25,7 +27,7 @@ public class TripMessageDto {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    TripMessageDto that = (TripMessageDto) o;
+    TripDto that = (TripDto) o;
     return Objects.equals(id, that.id);
   }
 
@@ -36,7 +38,7 @@ public class TripMessageDto {
 
   @Override
   public String toString() {
-    return "TripMessageDto{" +
+    return "TripDto{" +
       "id='" + id + '\'' +
       '}';
   }

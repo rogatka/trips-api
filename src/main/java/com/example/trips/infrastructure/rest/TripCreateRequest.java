@@ -1,62 +1,53 @@
 package com.example.trips.infrastructure.rest;
 
 import com.example.trips.api.model.GeolocationCoordinates;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@JsonDeserialize(builder = TripCreateRequest.Builder.class)
 class TripCreateRequest {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
-  private LocalDateTime startTime;
+  private final LocalDateTime startTime;
 
-  private LocalDateTime endTime;
+  private final LocalDateTime endTime;
 
-  private GeolocationCoordinates startDestinationCoordinates;
+  private final GeolocationCoordinates startDestinationCoordinates;
 
-  private GeolocationCoordinates finalDestinationCoordinates;
+  private final GeolocationCoordinates finalDestinationCoordinates;
 
-  private String ownerEmail;
+  private final String ownerEmail;
+
+  TripCreateRequest(Builder builder) {
+    this.startTime = builder.startTime;
+    this.endTime = builder.endTime;
+    this.startDestinationCoordinates = builder.startDestinationCoordinates;
+    this.finalDestinationCoordinates = builder.finalDestinationCoordinates;
+    this.ownerEmail = builder.ownerEmail;
+  }
 
   public LocalDateTime getStartTime() {
     return startTime;
-  }
-
-  public void setStartTime(LocalDateTime startTime) {
-    this.startTime = startTime;
   }
 
   public LocalDateTime getEndTime() {
     return endTime;
   }
 
-  public void setEndTime(LocalDateTime endTime) {
-    this.endTime = endTime;
-  }
-
   public GeolocationCoordinates getStartDestinationCoordinates() {
     return startDestinationCoordinates;
-  }
-
-  public void setStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
-    this.startDestinationCoordinates = startDestinationCoordinates;
   }
 
   public GeolocationCoordinates getFinalDestinationCoordinates() {
     return finalDestinationCoordinates;
   }
 
-  public void setFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
-    this.finalDestinationCoordinates = finalDestinationCoordinates;
-  }
-
   public String getOwnerEmail() {
     return ownerEmail;
-  }
-
-  public void setOwnerEmail(String ownerEmail) {
-    this.ownerEmail = ownerEmail;
   }
 
   @Override
@@ -89,5 +80,52 @@ class TripCreateRequest {
       ", finalDestinationCoordinates=" + finalDestinationCoordinates +
       ", ownerEmail=" + EMAIL_OBFUSCATED +
       '}';
+  }
+
+  @JsonPOJOBuilder
+  static class Builder {
+
+    private LocalDateTime startTime;
+
+    private LocalDateTime endTime;
+
+    private GeolocationCoordinates startDestinationCoordinates;
+
+    private GeolocationCoordinates finalDestinationCoordinates;
+
+    private String ownerEmail;
+
+    Builder withStartTime(LocalDateTime startTime) {
+      this.startTime = startTime;
+      return this;
+    }
+
+    Builder withEndTime(LocalDateTime endTime) {
+      this.endTime = endTime;
+      return this;
+    }
+
+    Builder withStartDestinationCoordinates(GeolocationCoordinates startDestinationCoordinates) {
+      this.startDestinationCoordinates = startDestinationCoordinates;
+      return this;
+    }
+
+    Builder withFinalDestinationCoordinates(GeolocationCoordinates finalDestinationCoordinates) {
+      this.finalDestinationCoordinates = finalDestinationCoordinates;
+      return this;
+    }
+
+    Builder withOwnerEmail(String ownerEmail) {
+      this.ownerEmail = ownerEmail;
+      return this;
+    }
+
+    public TripCreateRequest build() {
+      return new TripCreateRequest(this);
+    }
+  }
+
+  static Builder builder() {
+    return new Builder();
   }
 }

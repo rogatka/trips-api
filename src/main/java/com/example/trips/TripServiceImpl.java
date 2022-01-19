@@ -6,32 +6,32 @@ import com.example.trips.api.model.GeolocationCoordinates;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
-import com.example.trips.api.model.TripMessageDto;
+import com.example.trips.api.model.TripDto;
 import com.example.trips.api.model.TripUpdateDto;
 import com.example.trips.api.repository.TripRepository;
-import com.example.trips.api.service.TripMessagePublisher;
+import com.example.trips.api.service.TripPublisher;
 import com.example.trips.api.service.TripService;
+import org.springframework.stereotype.Service;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
-import org.springframework.stereotype.Service;
 
 @Service
 class TripServiceImpl implements TripService {
 
-  private final TripMessagePublisher tripMessagePublisher;
+  private final TripPublisher tripPublisher;
 
   private final TripRepository tripRepository;
 
-  TripServiceImpl(TripMessagePublisher tripMessagePublisher, TripRepository tripRepository) {
-    this.tripMessagePublisher = tripMessagePublisher;
+  TripServiceImpl(TripPublisher tripPublisher, TripRepository tripRepository) {
+    this.tripPublisher = tripPublisher;
     this.tripRepository = tripRepository;
   }
 
   @Override
   public Trip findById(String id) {
     return tripRepository.findById(id)
-        .orElseThrow(() -> new NotFoundException(String.format("Trip with id=%s not found", id)));
+      .orElseThrow(() -> new NotFoundException(String.format("Trip with id=%s not found", id)));
   }
 
   @Override
@@ -44,18 +44,18 @@ class TripServiceImpl implements TripService {
     validateTripCreateDto(tripCreateDto);
     Trip trip = buildTripFromTripCreateDto(tripCreateDto);
     trip = tripRepository.save(trip);
-    tripMessagePublisher.publishMessage(new TripMessageDto(trip.getId()));
+    tripPublisher.publish(new TripDto(trip.getId()));
     return trip;
   }
 
   @Override
   public Trip update(String id, TripUpdateDto tripUpdateDto) {
-    Objects.requireNonNull(id);
+    validateTripId(id);
     validateTripUpdateDto(tripUpdateDto);
     Trip trip = findById(id);
     Trip updatedTrip = updateTripFromTripUpdateDto(trip, tripUpdateDto);
     Trip savedTrip = tripRepository.save(updatedTrip);
-    tripMessagePublisher.publishMessage(new TripMessageDto(savedTrip.getId()));
+    tripPublisher.publish(new TripDto(savedTrip.getId()));
     return savedTrip;
   }
 
@@ -63,6 +63,12 @@ class TripServiceImpl implements TripService {
   public void deleteById(String id) {
     findById(id);
     tripRepository.deleteById(id);
+  }
+
+  private void validateTripId(String id) {
+    if (id == null) {
+      throw new ValidationException("Trip id cannot be null");
+    }
   }
 
   private void validateTripCreateDto(TripCreateDto tripCreateDto) {
@@ -89,23 +95,23 @@ class TripServiceImpl implements TripService {
 
   private Trip buildTripFromTripCreateDto(TripCreateDto tripCreateDto) {
     return Trip.builder()
-        .withStartTime(tripCreateDto.getStartTime())
-        .withEndTime(tripCreateDto.getEndTime())
-        .withStartDestination(getStartDestinationData(tripCreateDto.getStartDestinationCoordinates()))
-        .withFinalDestination(getFinalDestinationData(tripCreateDto.getFinalDestinationCoordinates()))
-        .withOwnerEmail(tripCreateDto.getOwnerEmail())
-        .withDateCreated(LocalDateTime.now())
-        .build();
+      .withStartTime(tripCreateDto.getStartTime())
+      .withEndTime(tripCreateDto.getEndTime())
+      .withStartDestination(getStartDestinationData(tripCreateDto.getStartDestinationCoordinates()))
+      .withFinalDestination(getFinalDestinationData(tripCreateDto.getFinalDestinationCoordinates()))
+      .withOwnerEmail(tripCreateDto.getOwnerEmail())
+      .withDateCreated(LocalDateTime.now())
+      .build();
   }
 
   private Trip updateTripFromTripUpdateDto(Trip trip, TripUpdateDto tripUpdateDto) {
     return Trip.builderFromExisting(trip)
-        .withStartDestination(getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()))
-        .withFinalDestination(getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()))
-        .withStartTime(tripUpdateDto.getStartTime())
-        .withEndTime(tripUpdateDto.getEndTime())
-        .withOwnerEmail(tripUpdateDto.getOwnerEmail())
-        .build();
+      .withStartDestination(getStartDestinationData(tripUpdateDto.getStartDestinationCoordinates()))
+      .withFinalDestination(getFinalDestinationData(tripUpdateDto.getFinalDestinationCoordinates()))
+      .withStartTime(tripUpdateDto.getStartTime())
+      .withEndTime(tripUpdateDto.getEndTime())
+      .withOwnerEmail(tripUpdateDto.getOwnerEmail())
+      .build();
   }
 
   private GeolocationData getStartDestinationData(GeolocationCoordinates startDestination) {
