@@ -1,13 +1,13 @@
 spring:
   data:
     mongodb:
-      host: ${TRIP_DB_HOST:localhost}
+      host: ${TRIP_DB_HOST_TEST:localhost}
       port: 27017
       database: trip-database
       username: trip
       password: trip
   rabbitmq:
-    host: ${RABBIT_MQ_HOST:localhost}
+    host: ${RABBIT_MQ_HOST_TEST:localhost}
     virtualHost: ${RABBIT_MQ_VIRTUAL_HOST:}
     username: ${RABBIT_MQ_USERNAME:guest}
     password: ${RABBIT_MQ_PASSWORD:guest}
@@ -22,7 +22,7 @@ spring:
           max-attempts: 3
 
 geolocation-api:
-  url: ${GEOLOCATION_API_URL:http://localhost:8090}
+  url: ${GEOLOCATION_API_URL_TEST:http://localhost:8090}
   api-key: ${GEOLOCATION_API_KEY:test}
 auth:
   secret: ${AUTH_SECRET:test}

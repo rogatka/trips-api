@@ -2,8 +2,6 @@ stages:
   - test
 
 test:
-  only:
-    - merge_requests
   stage: test
   image: gradle:6.9.2-jdk-alpine
   services :
