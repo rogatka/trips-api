@@ -59,15 +59,18 @@ class RabbitConsumerUnitTest {
   private RabbitConsumer rabbitConsumer;
 
   @Test
-  void shouldNotEnrichTrip_IfTripNotFoundById() {
+  void shouldThrowNotFoundExceptionAndNotEnrichTrip_IfTripNotFoundById() {
     //given
     TripDto tripDto = new TripDto(TRIP_ID);
     when(tripService.findById(TRIP_ID)).thenThrow(NotFoundException.class);
 
     //when
-    rabbitConsumer.consume(tripDto);
+    ThrowableAssert.ThrowingCallable executable = () -> rabbitConsumer.consume(tripDto);
 
     //then
+    assertThatThrownBy(executable)
+      .isInstanceOf(NotFoundException.class);
+
     verifyNoInteractions(tripEnricher);
     verifyNoInteractions(tripRepository);
   }

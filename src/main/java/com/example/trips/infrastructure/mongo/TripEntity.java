@@ -5,6 +5,8 @@ import com.example.trips.api.model.GeolocationData;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import org.springframework.data.annotation.PersistenceConstructor;
+
 public class TripEntity {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
@@ -23,8 +25,9 @@ public class TripEntity {
 
   private final String ownerEmail;
 
+  @PersistenceConstructor
   private TripEntity(String id, LocalDateTime startTime, LocalDateTime endTime, GeolocationData startDestination,
-             GeolocationData finalDestination, LocalDateTime dateCreated, String ownerEmail) {
+                     GeolocationData finalDestination, LocalDateTime dateCreated, String ownerEmail) {
     this.id = id;
     this.startTime = startTime;
     this.endTime = endTime;
@@ -32,6 +35,16 @@ public class TripEntity {
     this.finalDestination = finalDestination;
     this.dateCreated = dateCreated;
     this.ownerEmail = ownerEmail;
+  }
+
+  private TripEntity(Builder builder) {
+    this.id = builder.id;
+    this.startTime = builder.startTime;
+    this.endTime = builder.endTime;
+    this.startDestination = builder.startDestination;
+    this.finalDestination = builder.finalDestination;
+    this.dateCreated = builder.dateCreated;
+    this.ownerEmail = builder.ownerEmail;
   }
 
   String getId() {
@@ -150,8 +163,7 @@ public class TripEntity {
     }
 
     TripEntity build() {
-      return new TripEntity(this.id, this.startTime, this.endTime, this.startDestination, this.finalDestination,
-        this.dateCreated, this.ownerEmail);
+      return new TripEntity(this);
     }
   }
 

@@ -7,7 +7,9 @@ import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.LocationErrorInfo;
 import com.example.trips.api.model.Trip;
 import com.example.trips.api.model.TripCreateDto;
+import com.example.trips.api.model.TripDto;
 import com.example.trips.api.repository.TripRepository;
+import com.example.trips.api.service.TripPublisher;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +17,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -36,7 +40,10 @@ import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -61,6 +68,9 @@ class RestIntegrationTest {
   private static final double WASHINGTON_LATITUDE = 38.899827;
 
   private static final double WASHINGTON_LONGITUDE = -77.037454;
+
+  @MockBean
+  private TripPublisher tripPublisher;
 
   @Autowired
   private TestRestTemplate testRestTemplate;
@@ -90,6 +100,7 @@ class RestIntegrationTest {
     //given
     TripCreateRequest tripCreateRequest = buildTripCreateRequest();
     HttpEntity<TripCreateRequest> request = new HttpEntity<>(tripCreateRequest, getAuthorizationHeader());
+    doNothing().when(tripPublisher).publish(any());
     //when
     ResponseEntity<TripResponse> createTripResponse = testRestTemplate.postForEntity("/trips", request, TripResponse.class);
     //then
@@ -119,6 +130,8 @@ class RestIntegrationTest {
         tuple("Invalid start location coordinates", "Cannot define location by coordinates. Please update start location coordinates"),
         tuple("Invalid final location coordinates", "Cannot define location by coordinates. Please update final location coordinates")
       );
+
+    verify(tripPublisher).publish(any(TripDto.class));
   }
 
   @Test
@@ -268,6 +281,7 @@ class RestIntegrationTest {
     Trip trip = tripRepository.save(buildTrip(getMoscowLocationData(), getWashingtonLocationData()));
     TripUpdateRequest tripUpdateRequest = buildTripUpdateRequest();
     HttpEntity<TripUpdateRequest> tripUpdateRequestEntity = new HttpEntity<>(tripUpdateRequest, getAuthorizationHeader());
+    doNothing().when(tripPublisher).publish(any());
 
     //when
     ResponseEntity<TripResponse> updateTripResponse = testRestTemplate.exchange("/trips/{id}",
@@ -300,6 +314,8 @@ class RestIntegrationTest {
         tuple("Invalid start location coordinates", "Cannot define location by coordinates. Please update start location coordinates"),
         tuple("Invalid final location coordinates", "Cannot define location by coordinates. Please update final location coordinates")
       );
+
+    verify(tripPublisher).publish(any(TripDto.class));
   }
 
   @AfterEach
