@@ -30,7 +30,6 @@ auth:
   secret: ${AUTH_SECRET:test}
 
 rabbit:
-  exchange: ${TRIP_EXCHANGE:trips}
+  exchange: ${TRIP_EXCHANGE:trips-enrichment}
   enrichment-queue-name: ${TRIP_ENRICHMENT_QUEUE:enrichment-queue}
-  enrichment-queue-binding-key: ${TRIP_ENRICHMENT_QUEUE_BINDING_KEY:trips.enrichment}
   dead-letter-enrichment-queue-name: ${TRIP_ENRICHMENT_DLQ:dead-letter-enrichment-queue}

@@ -13,13 +13,10 @@ class RabbitProperties {
 
   private final String deadLetterEnrichmentQueueName;
 
-  private final String enrichmentQueueBindingKey;
-
-  RabbitProperties(String exchange, String enrichmentQueueName, String deadLetterEnrichmentQueueName, String enrichmentQueueBindingKey) {
+  RabbitProperties(String exchange, String enrichmentQueueName, String deadLetterEnrichmentQueueName) {
     this.exchange = exchange;
     this.enrichmentQueueName = enrichmentQueueName;
     this.deadLetterEnrichmentQueueName = deadLetterEnrichmentQueueName;
-    this.enrichmentQueueBindingKey = enrichmentQueueBindingKey;
   }
 
   String getExchange() {
@@ -28,10 +25,6 @@ class RabbitProperties {
 
   String getEnrichmentQueueName() {
     return enrichmentQueueName;
-  }
-
-  String getEnrichmentQueueBindingKey() {
-    return enrichmentQueueBindingKey;
   }
 
   String getDeadLetterEnrichmentQueueName() {

@@ -15,29 +15,34 @@ class MongoDbTripRepository implements TripRepository {
 
   private final SpringDataMongoTripRepository tripRepository;
 
+  private final TripEntityMapper tripEntityMapper;
+
   @Autowired
-  MongoDbTripRepository(SpringDataMongoTripRepository tripRepository) {
+  MongoDbTripRepository(SpringDataMongoTripRepository tripRepository, TripEntityMapper tripEntityMapper) {
     this.tripRepository = tripRepository;
+    this.tripEntityMapper = tripEntityMapper;
   }
 
   @Override
   public Optional<Trip> findById(String id) {
-    return tripRepository.findById(id);
+    return tripRepository.findById(id)
+      .map(tripEntityMapper::tripEntityToTrip);
   }
 
   @Override
   public List<Trip> findAllByEmail(String email) {
-    return tripRepository.findAllByEmail(email);
+    return tripEntityMapper.tripEntitiesToTrips(tripRepository.findAllByEmail(email));
   }
 
   @Override
   public List<Trip> findAll() {
-    return tripRepository.findAll();
+    return tripEntityMapper.tripEntitiesToTrips(tripRepository.findAll());
   }
 
   @Override
   public Trip save(Trip trip) {
-    return tripRepository.save(trip);
+    TripEntity entity = tripEntityMapper.tripToTripEntity(trip);
+    return tripEntityMapper.tripEntityToTrip(tripRepository.save(entity));
   }
 
   @Override

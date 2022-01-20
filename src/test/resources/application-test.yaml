@@ -27,7 +27,6 @@ geolocation-api:
 auth:
   secret: ${AUTH_SECRET:test}
 rabbit:
-  exchange: trips
+  exchange: trips-enrichment
   enrichment-queue-name: enrichment-queue
-  enrichment-queue-binding-key: trips.enrichment
   dead-letter-enrichment-queue-name: dead-letter-enrichment-queue

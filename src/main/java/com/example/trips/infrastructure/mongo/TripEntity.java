@@ -1,9 +1,11 @@
-package com.example.trips.api.model;
+package com.example.trips.infrastructure.mongo;
+
+import com.example.trips.api.model.GeolocationData;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-public class Trip {
+public class TripEntity {
 
   private static final String EMAIL_OBFUSCATED = "[OBFUSCATED]";
 
@@ -21,41 +23,42 @@ public class Trip {
 
   private final String ownerEmail;
 
-  private Trip(Builder builder) {
-    this.id = builder.id;
-    this.startTime = builder.startTime;
-    this.endTime = builder.endTime;
-    this.startDestination = builder.startDestination;
-    this.finalDestination = builder.finalDestination;
-    this.dateCreated = builder.dateCreated;
-    this.ownerEmail = builder.ownerEmail;
+  private TripEntity(String id, LocalDateTime startTime, LocalDateTime endTime, GeolocationData startDestination,
+             GeolocationData finalDestination, LocalDateTime dateCreated, String ownerEmail) {
+    this.id = id;
+    this.startTime = startTime;
+    this.endTime = endTime;
+    this.startDestination = startDestination;
+    this.finalDestination = finalDestination;
+    this.dateCreated = dateCreated;
+    this.ownerEmail = ownerEmail;
   }
 
-  public String getId() {
+  String getId() {
     return id;
   }
 
-  public LocalDateTime getStartTime() {
+  LocalDateTime getStartTime() {
     return startTime;
   }
 
-  public LocalDateTime getEndTime() {
+  LocalDateTime getEndTime() {
     return endTime;
   }
 
-  public GeolocationData getStartDestination() {
+  GeolocationData getStartDestination() {
     return startDestination;
   }
 
-  public GeolocationData getFinalDestination() {
+  GeolocationData getFinalDestination() {
     return finalDestination;
   }
 
-  public LocalDateTime getDateCreated() {
+  LocalDateTime getDateCreated() {
     return dateCreated;
   }
 
-  public String getOwnerEmail() {
+  String getOwnerEmail() {
     return ownerEmail;
   }
 
@@ -67,7 +70,7 @@ public class Trip {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    Trip trip = (Trip) o;
+    TripEntity trip = (TripEntity) o;
     return Objects.equals(id, trip.id)
       && Objects.equals(startTime, trip.startTime)
       && Objects.equals(endTime, trip.endTime)
@@ -84,7 +87,7 @@ public class Trip {
 
   @Override
   public String toString() {
-    return "Trip{" +
+    return "TripEntity{" +
       "id='" + id + '\'' +
       ", startTime=" + startTime +
       ", endTime=" + endTime +
@@ -95,7 +98,7 @@ public class Trip {
       '}';
   }
 
-  public static class Builder {
+  static class Builder {
 
     private String id;
 
@@ -111,58 +114,48 @@ public class Trip {
 
     private String ownerEmail;
 
-    public Builder withId(String id) {
+    Builder withId(String id) {
       this.id = id;
       return this;
     }
 
-    public Builder withStartTime(LocalDateTime startTime) {
+    Builder withStartTime(LocalDateTime startTime) {
       this.startTime = startTime;
       return this;
     }
 
-    public Builder withEndTime(LocalDateTime endTime) {
+    Builder withEndTime(LocalDateTime endTime) {
       this.endTime = endTime;
       return this;
     }
 
-    public Builder withStartDestination(GeolocationData startDestination) {
+    Builder withStartDestination(GeolocationData startDestination) {
       this.startDestination = startDestination;
       return this;
     }
 
-    public Builder withFinalDestination(GeolocationData finalDestination) {
+    Builder withFinalDestination(GeolocationData finalDestination) {
       this.finalDestination = finalDestination;
       return this;
     }
 
-    public Builder withDateCreated(LocalDateTime dateCreated) {
+    Builder withDateCreated(LocalDateTime dateCreated) {
       this.dateCreated = dateCreated;
       return this;
     }
 
-    public Builder withOwnerEmail(String ownerEmail) {
+    Builder withOwnerEmail(String ownerEmail) {
       this.ownerEmail = ownerEmail;
       return this;
     }
 
-    public Trip build() {
-      return new Trip(this);
+    TripEntity build() {
+      return new TripEntity(this.id, this.startTime, this.endTime, this.startDestination, this.finalDestination,
+        this.dateCreated, this.ownerEmail);
     }
   }
 
-  public static Builder builder() {
+  static Builder builder() {
     return new Builder();
-  }
-
-  public static Builder builderFromExisting(Trip trip) {
-    return new Builder()
-      .withId(trip.getId())
-      .withDateCreated(trip.getDateCreated())
-      .withOwnerEmail(trip.getOwnerEmail())
-      .withStartTime(trip.getStartTime())
-      .withEndTime(trip.getEndTime())
-      .withStartDestination(trip.getStartDestination())
-      .withFinalDestination(trip.getFinalDestination());
   }
 }

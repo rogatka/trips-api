@@ -3,9 +3,9 @@ package com.example.trips.infrastructure.rabbitmq;
 import org.springframework.amqp.core.AmqpAdmin;
 import org.springframework.amqp.core.BindingBuilder;
 import org.springframework.amqp.core.Declarables;
+import org.springframework.amqp.core.FanoutExchange;
 import org.springframework.amqp.core.Queue;
 import org.springframework.amqp.core.QueueBuilder;
-import org.springframework.amqp.core.TopicExchange;
 import org.springframework.amqp.rabbit.annotation.RabbitListenerConfigurer;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
@@ -30,7 +30,7 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
 
   @Bean
   public Declarables exchangeBindings(RabbitProperties rabbitProperties) {
-    TopicExchange tripsTopicExchange = new TopicExchange(rabbitProperties.getExchange());
+    FanoutExchange tripsEnrichmentExchange = new FanoutExchange(rabbitProperties.getExchange());
 
     Queue enrichmentQueue = QueueBuilder
       .durable(rabbitProperties.getEnrichmentQueueName())
@@ -41,8 +41,8 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
       .durable(rabbitProperties.getDeadLetterEnrichmentQueueName())
       .build();
 
-    return new Declarables(enrichmentQueue, tripsTopicExchange, deadLetterQueue,
-      BindingBuilder.bind(enrichmentQueue).to(tripsTopicExchange).with(rabbitProperties.getEnrichmentQueueBindingKey())
+    return new Declarables(enrichmentQueue, tripsEnrichmentExchange, deadLetterQueue,
+      BindingBuilder.bind(enrichmentQueue).to(tripsEnrichmentExchange)
     );
   }
 
@@ -68,7 +68,6 @@ class RabbitConfiguration implements RabbitListenerConfigurer {
     final RabbitTemplate rabbitTemplate = new RabbitTemplate(connectionFactory);
     rabbitTemplate.setMessageConverter(producerJackson2MessageConverter());
     rabbitTemplate.setExchange(rabbitProperties.getExchange());
-    rabbitTemplate.setRoutingKey(rabbitProperties.getEnrichmentQueueBindingKey());
     return rabbitTemplate;
   }
 
