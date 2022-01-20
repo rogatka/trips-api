@@ -3,7 +3,7 @@ web-security:
 spring:
   data:
     mongodb:
-      host: localhost
+      host: ${TRIP_DB_HOST:localhost}
       port: 27017
       database: trip-database
       username: trip

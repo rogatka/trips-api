@@ -1,7 +1,7 @@
 spring:
   data:
     mongodb:
-      host: localhost
+      host: ${TRIP_DB_HOST:localhost}
       port: 27017
       database: trip-database
       username: trip
@@ -22,10 +22,10 @@ spring:
           max-attempts: 3
 
 geolocation-api:
-  url: http://localhost:8090
-  api-key: test
+  url: ${GEOLOCATION_API_URL:http://localhost:8090}
+  api-key: ${GEOLOCATION_API_KEY:test}
 auth:
-  secret: test
+  secret: ${AUTH_SECRET:test}
 rabbit:
   exchange: trips
   enrichment-queue-name: enrichment-queue
