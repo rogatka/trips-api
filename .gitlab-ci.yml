@@ -7,6 +7,6 @@ test:
   services :
     - name: docker:dind
   before_script:
-    - 'ping -c 2 ${GEOLOCATION_API_URL_TEST} -w 10'
+    - 'ping -c 2 ${TRIP_DB_HOST_TEST} -w 10'
   script:
     - 'gradle test'
