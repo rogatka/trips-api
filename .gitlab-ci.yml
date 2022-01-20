@@ -3,7 +3,7 @@ stages:
 
 test:
   stage: test
-  image: gradle:6.9.2-jdk-alpine
+  image: gradle:7.3.3-jdk11-alpine
   services :
     - name: docker:dind
   script:
