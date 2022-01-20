@@ -6,5 +6,7 @@ test:
   image: gradle:7.3.3-jdk11-alpine
   services :
     - name: docker:dind
+  before_script:
+    - 'ping -c 2 {GEOLOCATION_API_URL_TEST} -w 10'
   script:
     - 'gradle test'
