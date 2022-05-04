@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/reverse?limit=1&access_key=test&query=55.755793%2C37.617134"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "latitude": 55.75583,
+          "longitude": 37.6173,
+          "type": "venue",
+          "distance": 0.011,
+          "name": "Konobeevo",
+          "number": null,
+          "postal_code": null,
+          "street": null,
+          "confidence": 0.8,
+          "region": "Moscow City",
+          "region_code": "MS",
+          "county": "Jakimanka",
+          "locality": "Moscow",
+          "administrative_area": null,
+          "neighbourhood": "Dorogomilovo District",
+          "country": "Russia",
+          "country_code": "RUS",
+          "continent": "Europe",
+          "label": "Konobeevo, Moscow, MS, Russia"
+        }
+      ]
+    }
+  }
+}

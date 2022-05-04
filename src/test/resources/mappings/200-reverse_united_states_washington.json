@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/reverse?limit=1&access_key=test&query=38.899827%2C-77.037454"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "latitude": 38.89983,
+          "longitude": -77.0372,
+          "type": "venue",
+          "distance": 0.022,
+          "name": "Von Steuben Statue",
+          "number": null,
+          "postal_code": null,
+          "street": null,
+          "confidence": 0.8,
+          "region": "District of Columbia",
+          "region_code": "DC",
+          "county": "District of Columbia",
+          "locality": "Washington",
+          "administrative_area": null,
+          "neighbourhood": "Lafayette Square",
+          "country": "United States",
+          "country_code": "USA",
+          "continent": "North America",
+          "label": "Von Steuben Statue, Washington, DC, USA"
+        }
+      ]
+    }
+  }
+}

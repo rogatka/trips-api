@@ -1,0 +1,37 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/reverse?limit=1&access_key=test&query=55.555555%2C44.444444"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "data": [
+        {
+          "latitude": 55.562911,
+          "longitude": 44.442248,
+          "type": "venue",
+          "distance": 0.83,
+          "name": "Ревезень",
+          "number": null,
+          "postal_code": null,
+          "street": null,
+          "confidence": 0.6,
+          "region": "Nizhny Novgorod",
+          "region_code": "NZ",
+          "county": "Perevozskiy",
+          "locality": null,
+          "administrative_area": null,
+          "neighbourhood": null,
+          "country": "Russia",
+          "country_code": "RUS",
+          "continent": "Europe",
+          "label": "Ревезень, NZ, Russia"
+        }
+      ]
+    }
+  }
+}
