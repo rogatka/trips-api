@@ -1,12 +1,9 @@
 package com.example.trips.infrastructure.rest;
 
-import com.example.trips.api.exception.NotFoundException;
-import com.example.trips.api.exception.ValidationException;
 import com.example.trips.api.model.GeolocationCoordinates;
 import com.example.trips.api.model.GeolocationData;
 import com.example.trips.api.model.LocationErrorInfo;
 import com.example.trips.api.model.Trip;
-import com.example.trips.api.model.TripCreateDto;
 import com.example.trips.api.model.TripDto;
 import com.example.trips.api.repository.TripRepository;
 import com.example.trips.api.service.TripPublisher;
@@ -18,14 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -36,20 +31,9 @@ import java.util.function.Predicate;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.hamcrest.Matchers.is;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -86,9 +70,9 @@ class RestIntegrationTest {
     //given
     HttpHeaders invalidAuthorizationHeader = getInvalidAuthorizationHeader();
     //when
-    ResponseEntity<List<TripResponse>> findAllByEmailResponse = testRestTemplate.exchange(
+    ResponseEntity<String> findAllByEmailResponse = testRestTemplate.exchange(
       "/trips?email={email}", HttpMethod.GET, new HttpEntity<>(invalidAuthorizationHeader),
-      new ParameterizedTypeReference<List<TripResponse>>() {
+      new ParameterizedTypeReference<>() {
       }, Map.of("email", "test@mail.com"));
     //then
     assertThat(findAllByEmailResponse)
